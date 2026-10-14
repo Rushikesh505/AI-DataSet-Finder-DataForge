@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: dataforge
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --workers 1 --threads 8 --timeout 75 app:app
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: DATAFORGE_JOB_SECONDS
+        value: "300"
+      - key: DATAFORGE_MAX_ACTIVE_JOBS
+        value: "2"
+      - key: DATAFORGE_MAX_OUTPUT_MB
+        value: "2048"
+      - key: DATAFORGE_CRAWL_WORKERS
+        value: "8"
+      - key: DATAFORGE_DOWNLOAD_WORKERS
+        value: "8"
+      - key: DATAFORGE_MAX_HOST_CONNECTIONS
+        value: "2"

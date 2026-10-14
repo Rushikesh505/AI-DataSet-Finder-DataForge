@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DataForge — GODMODE Dataset Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --black: #080808;
+  --white: #f8f6f1;
+  --gray1: #111;
+  --gray2: #1c1c1c;
+  --gray3: #2a2a2a;
+  --gray4: #3a3a3a;
+  --muted: #666;
+  --muted2: #444;
+  --rule: #222;
+  --rule2: #333;
+  --c-text:  #c8f5e8;
+  --c-image: #f5c8a0;
+  --c-audio: #c8bef5;
+  --c-video: #f5c8c8;
+  --c-text-dim:  rgba(200,245,232,0.12);
+  --c-image-dim: rgba(245,200,160,0.12);
+  --c-audio-dim: rgba(200,190,245,0.12);
+  --c-video-dim: rgba(245,200,200,0.12);
+  --gold: #d4a843;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Instrument Sans', sans-serif;
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Background grid */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── HEADER ──────────────────────────────── */
+.header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  height: 56px;
+  border-bottom: 1px solid var(--rule);
+  background: rgba(8,8,8,0.95);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  padding: 0 2rem;
+  gap: 2rem;
+}
+
+.logo {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.logo-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  color: var(--white);
+}
+
+.logo-mode {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  text-transform: uppercase;
+  border: 1px solid rgba(212,168,67,0.4);
+  padding: 0.15rem 0.5rem;
+  border-radius: 2px;
+}
+
+.header-divider { width: 1px; height: 24px; background: var(--rule2); flex-shrink: 0; }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+  gap: 0;
+  flex: 1;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 1.4rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  font-family: 'Instrument Sans', sans-serif;
+  position: relative;
+  bottom: -1px;
+  white-space: nowrap;
+}
+
+.tab:hover { color: rgba(255,255,255,0.7); }
+.tab.t-text.active  { color: var(--c-text);  border-bottom-color: var(--c-text);  background: var(--c-text-dim); }
+.tab.t-image.active { color: var(--c-image); border-bottom-color: var(--c-image); background: var(--c-image-dim); }
+.tab.t-audio.active { color: var(--c-audio); border-bottom-color: var(--c-audio); background: var(--c-audio-dim); }
+.tab.t-video.active { color: var(--c-video); border-bottom-color: var(--c-video); background: var(--c-video-dim); }
+
+.tab-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.t-text  .tab-dot { background: var(--c-text); }
+.t-image .tab-dot { background: var(--c-image); }
+.t-audio .tab-dot { background: var(--c-audio); }
+.t-video .tab-dot { background: var(--c-video); }
+
+.tab-formats {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--muted);
+}
+
+.live-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #2d7a3a;
+  display: inline-block;
+  margin-right: 0.3rem;
+  animation: live-pulse 2s ease-in-out infinite;
+}
+@keyframes live-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* ── SECTIONS ─────────────────────────────── */
+.section { display: none; padding-top: 56px; }
+.section.active { display: flex; flex-direction: column; min-height: 100vh; animation: fade-up 0.25s ease; }
+@keyframes fade-up { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+/* Hero bar */
+.hero-bar {
+  position: relative;
+  z-index: 1;
+  padding: 2rem 2.5rem 1.5rem;
+  border-bottom: 1px solid var(--rule);
+  overflow: hidden;
+}
+
+.hero-bar::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  opacity: 0.04;
+  pointer-events: none;
+}
+
+.s-text  .hero-bar::before { background: radial-gradient(ellipse at 20% 50%, var(--c-text), transparent 60%); }
+.s-image .hero-bar::before { background: radial-gradient(ellipse at 20% 50%, var(--c-image), transparent 60%); }
+.s-audio .hero-bar::before { background: radial-gradient(ellipse at 20% 50%, var(--c-audio), transparent 60%); }
+.s-video .hero-bar::before { background: radial-gradient(ellipse at 20% 50%, var(--c-video), transparent 60%); }
+
+.hero-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2rem;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 0.35rem;
+}
+
+.hero-sub {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.04em;
+}
+
+/* ── MAIN WORKSPACE ──────────────────────── */
+.workspace {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── SIDEBAR ──────────────────────────────── */
+.sidebar {
+  border-right: 1px solid var(--rule);
+  padding: 1.5rem;
+  overflow-y: auto;
+  background: rgba(255,255,255,0.01);
+}
+
+.field { margin-bottom: 1.5rem; }
+
+.field-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.55rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.field-label .val {
+  font-weight: 600;
+  color: var(--white);
+}
+
+/* Topic textarea */
+.topic-box {
+  width: 100%;
+  background: var(--gray2);
+  border: 1px solid var(--rule2);
+  border-radius: 4px;
+  padding: 0.85rem 1rem;
+  color: var(--white);
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.9rem;
+  resize: none;
+  min-height: 90px;
+  outline: none;
+  transition: border-color 0.15s;
+  line-height: 1.5;
+}
+.topic-box::placeholder { color: var(--muted2); }
+.topic-box:focus { border-color: var(--gray4); background: var(--gray1); }
+
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.sugg {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  background: var(--gray2);
+  border: 1px solid var(--rule2);
+  color: var(--muted);
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.1s;
+  white-space: nowrap;
+}
+.sugg:hover { background: var(--gray3); color: var(--white); border-color: var(--gray4); }
+
+/* Format pills */
+.fmt-pills { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.fmt-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--gray2);
+  border: 1px solid var(--rule2);
+  border-radius: 3px;
+  padding: 0.25rem 0.65rem;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--muted);
+  transition: all 0.1s;
+  user-select: none;
+}
+.fmt-pill input { display: none; }
+.fmt-pill .pill-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--gray4); transition: all 0.1s; }
+.fmt-pill:has(input:checked) { background: var(--gray3); border-color: var(--gray4); color: var(--white); }
+.fmt-pill:has(input:checked) .pill-dot { background: var(--white); }
+
+/* Size selector */
+.size-pills { display: grid; grid-template-columns: repeat(5,1fr); gap: 0.35rem; }
+.sz-pill {
+  background: var(--gray2);
+  border: 1px solid var(--rule2);
+  border-radius: 3px;
+  padding: 0.5rem 0.2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.1s;
+  font-family: inherit;
+}
+.sz-pill:hover { border-color: var(--gray4); }
+.sz-pill.active { background: var(--gray3); border-color: var(--white); }
+.sz-name { font-weight: 700; font-size: 0.75rem; display: block; color: var(--white); }
+.sz-desc { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; color: var(--muted); line-height: 1.5; }
+
+/* Sliders */
+.slider-row { display: flex; align-items: center; gap: 0.75rem; }
+.slider {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 2px;
+  background: var(--gray3);
+  border-radius: 2px;
+  outline: none;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px; height: 12px;
+  background: var(--white);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.slider-val { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--white); min-width: 2.5rem; text-align: right; }
+
+/* Run button */
+.run-btn {
+  width: 100%;
+  padding: 0.85rem 1.5rem;
+  background: var(--white);
+  color: var(--black);
+  border: none;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+.run-btn:hover:not(:disabled) { background: #e8e8e8; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(255,255,255,0.1); }
+.run-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.godmode-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5rem;
+  background: linear-gradient(135deg, #d4a843, #f5c842);
+  color: var(--black);
+  padding: 0.15rem 0.45rem;
+  border-radius: 2px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+/* ── MAIN CONTENT ─────────────────────────── */
+.main-col {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Terminal */
+.terminal-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  min-height: 360px;
+}
+
+.terminal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.terminal-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pip { width: 6px; height: 6px; border-radius: 50%; background: var(--gray4); flex-shrink: 0; }
+.pip.run { background: #2d7a3a; animation: pp 1.5s ease-in-out infinite; }
+.pip.done { background: #2d7a3a; }
+.pip.err { background: #a02020; }
+@keyframes pp { 0%,100%{box-shadow:0 0 0 0 rgba(45,122,58,0.6)} 50%{box-shadow:0 0 0 5px rgba(45,122,58,0)} }
+
+.terminal-box {
+  background: #050505;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.t-bar {
+  background: var(--gray1);
+  border-bottom: 1px solid var(--rule);
+  padding: 0.45rem 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.t-circle { width: 10px; height: 10px; border-radius: 50%; }
+.t-circle.r { background: #ff5f57; }
+.t-circle.y { background: #febc2e; }
+.t-circle.g { background: #28c840; }
+.t-id { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; color: var(--muted2); margin-left: auto; }
+
+.t-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  line-height: 1.8;
+  min-height: 280px;
+}
+.t-body::-webkit-scrollbar { width: 4px; }
+.t-body::-webkit-scrollbar-thumb { background: var(--gray3); border-radius: 2px; }
+
+.ll { color: #555; animation: la 0.12s ease; }
+.ll.ok   { color: #4ade80; }
+.ll.er   { color: #f87171; }
+.ll.hi   { color: #e2e8f0; }
+.ll.gold { color: var(--gold); }
+.ll.blue { color: #60a5fa; }
+.ll.warn { color: #fbbf24; }
+@keyframes la { from{opacity:0} to{opacity:1} }
+.lts { color: #333; margin-right: 0.5rem; }
+.cursor { display: inline-block; width: 7px; height: 12px; background: #4ade80; margin-left: 2px; animation: bl 1s step-end infinite; vertical-align: middle; }
+@keyframes bl { 50%{opacity:0} }
+
+/* Progress */
+.prog-bar-area {
+  border-top: 1px solid var(--rule);
+  padding: 1rem 1.5rem;
+  background: rgba(255,255,255,0.01);
+}
+.prog-meta { display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--muted); margin-bottom: 0.5rem; }
+.prog-pct { color: var(--white); font-weight: 600; }
+.prog-track { height: 2px; background: var(--gray3); border-radius: 2px; overflow: hidden; }
+.prog-fill { height: 100%; background: var(--white); border-radius: 2px; width: 0%; transition: width 0.4s ease; }
+
+/* ── RESULTS ──────────────────────────────── */
+.results {
+  border-top: 1px solid var(--rule);
+  padding: 1.5rem;
+  display: none;
+  animation: fade-up 0.3s ease;
+}
+.results.show { display: block; }
+
+.results-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.3rem;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Stat grid */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1.2rem;
+}
+
+.stat-box {
+  background: var(--gray1);
+  padding: 1rem 1.2rem;
+  text-align: center;
+}
+
+.stat-num {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.8rem;
+  letter-spacing: -0.04em;
+  color: var(--white);
+  display: block;
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+
+.stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Quality meter */
+.quality-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--gray1);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+}
+.quality-label { color: var(--muted); flex-shrink: 0; }
+.quality-track { flex: 1; height: 4px; background: var(--gray3); border-radius: 2px; overflow: hidden; }
+.quality-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, #f87171, #fbbf24, #4ade80); transition: width 1s ease; }
+.quality-num { color: var(--gold); font-weight: 600; font-size: 0.7rem; }
+
+/* Filter badge */
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: #4ade80;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(74,222,128,0.05);
+  border: 1px solid rgba(74,222,128,0.15);
+  border-radius: 3px;
+}
+
+/* Sentiment */
+.sent-bar { height: 6px; display: flex; border-radius: 3px; overflow: hidden; gap: 2px; margin: 0.5rem 0; }
+.s-p { background: #4ade80; transition: flex 0.8s ease; }
+.s-n { background: #f87171; transition: flex 0.8s ease; }
+.s-u { background: #555; transition: flex 0.8s ease; }
+.sent-nums { display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 0.56rem; color: var(--muted); }
+
+/* Domains */
+.dom-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.3rem 0; border-bottom: 1px solid var(--rule); }
+.dom-name { font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; color: var(--muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dom-bar-w { flex: 2; height: 2px; background: var(--gray3); border-radius: 2px; }
+.dom-bar { height: 100%; background: var(--white); opacity: 0.4; border-radius: 2px; }
+.dom-count { font-family: 'JetBrains Mono', monospace; font-size: 0.56rem; color: var(--muted); min-width: 1.5rem; text-align: right; }
+
+/* Contents box */
+.contents {
+  background: var(--gray1);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 1rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  line-height: 2;
+  color: var(--muted);
+}
+.contents strong { color: var(--white); }
+
+/* Download */
+.dl-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: var(--gray2);
+  border: 1px solid var(--gray4);
+  border-radius: 4px;
+  padding: 1rem 1.2rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s;
+  color: inherit;
+}
+.dl-btn:hover { background: var(--gray3); border-color: var(--white); }
+.dl-left { display: flex; align-items: center; gap: 0.8rem; }
+.dl-icon { font-size: 1.4rem; }
+.dl-title { font-weight: 600; font-size: 0.85rem; display: block; color: var(--white); }
+.dl-sub { font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; color: var(--muted); }
+.dl-arrow { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--muted); }
+.dl-hint { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; color: var(--muted2); margin-top: 0.5rem; text-align: center; }
+
+/* Sections label helper */
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.catalog-panel { margin-top: 1.25rem; }
+.catalog-note { color: var(--muted); font: 0.58rem/1.7 'JetBrains Mono', monospace; margin: 0.4rem 0 0.7rem; }
+.catalog-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 0.55rem; }
+.catalog-card { display: block; min-width: 0; padding: 0.8rem 0.9rem; background: var(--gray1); border: 1px solid var(--rule2); border-radius: 4px; text-decoration: none; color: inherit; transition: border-color 0.15s, background 0.15s; }
+.catalog-card:hover { border-color: var(--white); background: var(--gray2); }
+.catalog-source { display: block; color: var(--gold); font: 0.53rem 'JetBrains Mono',monospace; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.4rem; }
+.catalog-title { display: block; color: var(--white); font-size: 0.76rem; line-height: 1.4; overflow-wrap: anywhere; }
+.catalog-desc { display: block; color: var(--muted); font: 0.58rem/1.5 'JetBrains Mono',monospace; margin-top: 0.35rem; }
+.catalog-score { display: block; color: #4ade80; font: 0.52rem 'JetBrains Mono',monospace; margin-top: 0.45rem; }
+
+.hidden { display: none !important; }
+
+footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--rule);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.56rem;
+  color: var(--muted2);
+}
+
+@media (max-width: 900px) {
+  .workspace { grid-template-columns: 1fr; }
+  .sidebar { border-right: none; border-bottom: 1px solid var(--rule); }
+  .tabs { overflow-x: auto; }
+  .tab-formats { display: none; }
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+}
+
+    /* Target size selector */
+    .target-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: .4rem;
+      margin-bottom: .5rem;
+    }
+    .tgt-btn {
+      background: var(--surface2,#1e1e1e);
+      border: 1px solid var(--border,#333);
+      border-radius: 4px;
+      padding: .55rem .3rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .tgt-btn .tgt-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      font-weight: 700;
+      display: block;
+      color: var(--muted2, #888);
+    }
+    .tgt-btn:hover { border-color: var(--gold,#f59e0b); }
+    .tgt-btn.active { background: rgba(245,158,11,.12); border-color: var(--gold,#f59e0b); }
+    .tgt-btn.active .tgt-name { color: var(--gold,#f59e0b); }
+    .custom-input {
+      width: 100%;
+      margin-top: .5rem;
+      padding: .5rem .8rem;
+      background: var(--surface2,#1e1e1e);
+      border: 1px solid var(--border,#333);
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .85rem;
+      color: var(--text,#e5e5e5);
+      outline: none;
+      transition: border-color .15s;
+    }
+    .custom-input:focus { border-color: var(--gold,#f59e0b); }
+    .target-hint {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .58rem;
+      color: var(--muted,#666);
+      margin-top: .4rem;
+      line-height: 1.5;
+    }
+    /* Fuel gauge progress */
+    .fuel-gauge {
+      display: none;
+      margin-top: .8rem;
+      padding: .8rem 1rem;
+      background: var(--surface2,#1a1a1a);
+      border: 1px solid var(--border,#333);
+      border-radius: 6px;
+    }
+    .fuel-gauge.visible { display: block; }
+    .fuel-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: .5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .62rem;
+    }
+    .fuel-collected { color: var(--gold,#f59e0b); font-weight: 700; font-size: .85rem; }
+    .fuel-target { color: var(--muted,#666); }
+    .fuel-track {
+      height: 8px;
+      background: var(--surface3,#111);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .fuel-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold,#f59e0b), #ef4444);
+      border-radius: 4px;
+      width: 0%;
+      transition: width .5s ease;
+    }
+    .fuel-eta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .58rem;
+      color: var(--muted,#666);
+      margin-top: .35rem;
+      text-align: right;
+    }
+.tank-overlay { display:none; position:fixed; right:1.5rem; bottom:1.5rem; z-index:200; width:min(370px,calc(100vw - 2rem)); padding:1rem; border:1px solid rgba(212,168,67,.3); border-radius:16px; background:linear-gradient(145deg,rgba(27,27,27,.97),rgba(10,10,10,.96)); box-shadow:0 18px 60px rgba(0,0,0,.55),0 0 36px rgba(212,168,67,.08); backdrop-filter:blur(18px); }
+.tank-overlay.visible { display:block; animation:tank-enter .35s cubic-bezier(.2,.8,.2,1) both; }
+.tank-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:.85rem; }
+.tank-brand { display:flex; align-items:center; gap:.6rem; color:var(--white); font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+.tank-icon { display:grid; place-items:center; width:30px; height:30px; border-radius:9px; color:#f4c969; background:rgba(212,168,67,.12); border:1px solid rgba(212,168,67,.25); }
+.tank-mode { color:#f4c969; font:600 .58rem 'JetBrains Mono',monospace; letter-spacing:.06em; }
+.tank-layout { display:grid; grid-template-columns:78px 1fr; gap:1rem; align-items:center; }
+.tank-vessel { position:relative; height:124px; overflow:hidden; border:2px solid rgba(255,255,255,.19); border-top:4px solid rgba(244,201,105,.62); border-radius:15px 15px 20px 20px; background:repeating-linear-gradient(to bottom,transparent 0 24px,rgba(255,255,255,.09) 24px 25px),linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.01)); box-shadow:inset 0 0 20px rgba(0,0,0,.35),0 0 20px rgba(212,168,67,.08); }
+.tank-vessel::before,.tank-vessel::after { content:''; position:absolute; z-index:3; left:50%; width:19px; height:6px; transform:translateX(-50%); border:1px solid rgba(255,255,255,.2); border-radius:8px; background:#141414; }
+.tank-vessel::before { top:-5px; } .tank-vessel::after { bottom:-5px; }
+.tank-liquid { position:absolute; left:0; right:0; bottom:0; z-index:1; height:0; overflow:hidden; background:linear-gradient(180deg,rgba(255,214,121,.78),rgba(206,137,32,.48)); box-shadow:0 -4px 20px rgba(244,183,69,.16); transition:height .9s cubic-bezier(.2,.8,.2,1); }
+.tank-liquid::before,.tank-liquid::after { content:''; position:absolute; top:-9px; left:-50%; width:200%; height:19px; border-radius:45%; background:rgba(255,245,212,.34); animation:tank-wave 5s linear infinite; }
+.tank-liquid::after { top:-5px; left:-35%; opacity:.5; animation-duration:7s; animation-direction:reverse; }
+.tank-readout { min-width:0; } .tank-amount { color:#f4c969; font:700 1.55rem/1.1 'JetBrains Mono',monospace; letter-spacing:-.06em; }
+.tank-target { margin-top:.25rem; color:#818181; font:500 .62rem 'JetBrains Mono',monospace; }
+.tank-meter { height:5px; margin:.75rem 0; overflow:hidden; border-radius:9px; background:#292929; }
+.tank-meter-fill { width:0; height:100%; border-radius:inherit; background:linear-gradient(90deg,#f4c969,#e08a36); transition:width .7s ease; }
+.tank-data { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
+.tank-data-item { min-width:0; padding:.48rem .55rem; border:1px solid rgba(255,255,255,.07); border-radius:8px; background:rgba(255,255,255,.025); }
+.tank-data-label { color:#747474; font:500 .5rem 'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:.09em; }
+.tank-data-value { margin-top:.12rem; overflow:hidden; color:#dedbd2; font:600 .66rem 'JetBrains Mono',monospace; text-overflow:ellipsis; white-space:nowrap; }
+.tank-foot { display:flex; justify-content:space-between; gap:.5rem; margin-top:.75rem; color:#777; font:500 .55rem 'JetBrains Mono',monospace; }
+@keyframes tank-wave { to { transform:translateX(50%); } }
+@keyframes tank-enter { from { opacity:0; transform:translateY(12px) scale(.98); } to { opacity:1; transform:translateY(0) scale(1); } }
+@media(max-width:560px) { .tank-overlay { right:1rem; bottom:1rem; } .tank-layout { grid-template-columns:64px 1fr; gap:.75rem; } .tank-vessel { height:108px; } }
+@media(prefers-reduced-motion:reduce) { .tank-overlay.visible { animation:none; } .tank-liquid,.tank-meter-fill { transition:none; } .tank-liquid::before,.tank-liquid::after { animation:none; } }
+</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='brand-skin.css') }}"/>
+</head>
+<body class="dashboard-page">
+
+<header class="header">
+  <div class="logo">
+    <span class="logo-name">DataForge</span>
+    <span class="logo-mode">GODMODE</span>
+  </div>
+  <div class="header-divider"></div>
+  <nav class="tabs">
+    <button class="tab t-text active" onclick="switchTab('text',this)">
+      <span class="tab-dot"></span>
+      Text
+      <span class="tab-formats">CSV · JSON · JSONL</span>
+    </button>
+    <button class="tab t-image" onclick="switchTab('image',this)">
+      <span class="tab-dot"></span>
+      Images
+      <span class="tab-formats">JPG · PNG · WEBP</span>
+    </button>
+    <button class="tab t-audio" onclick="switchTab('audio',this)">
+      <span class="tab-dot"></span>
+      Audio
+      <span class="tab-formats">MP3 · WAV · OGG</span>
+    </button>
+    <button class="tab t-video" onclick="switchTab('video',this)">
+      <span class="tab-dot"></span>
+      Video
+      <span class="tab-formats">MP4 · WEBM · MOV</span>
+    </button>
+  </nav>
+  <div class="header-right">
+    <span><span class="live-dot"></span>System online</span>
+  </div>
+</header>
+
+<!-- TEXT -->
+<div class="section s-text active" id="s-text">
+  <div class="hero-bar">
+    <div class="hero-title">Text Dataset</div>
+    <div class="hero-sub">Searches article sources → filters by topic → adds sentiment and topic labels → exports CSV, JSON, and JSONL</div>
+  </div>
+  <div class="workspace">
+    <aside class="sidebar">
+      <div class="field">
+        <div class="field-label">Topic or question</div>
+        <textarea class="topic-box" id="t-text" placeholder="Type a topic, question, or description&#10;e.g. machine learning in drug discovery&#10;e.g. what is quantum computing" rows="4"></textarea>
+        <div class="suggestions">
+          <span class="sugg" onclick="setT('t-text',this)">machine learning</span>
+          <span class="sugg" onclick="setT('t-text',this)">climate change impacts</span>
+          <span class="sugg" onclick="setT('t-text',this)">blockchain finance</span>
+          <span class="sugg" onclick="setT('t-text',this)">AI healthcare</span>
+          <span class="sugg" onclick="setT('t-text',this)">renewable energy</span>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Output format</div>
+        <div class="fmt-pills">
+          <label class="fmt-pill"><input type="checkbox" checked name="tf" value="csv"><span class="pill-dot"></span>CSV</label>
+          <label class="fmt-pill"><input type="checkbox" checked name="tf" value="json"><span class="pill-dot"></span>JSON</label>
+          <label class="fmt-pill"><input type="checkbox" checked name="tf" value="jsonl"><span class="pill-dot"></span>JSONL</label>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Target dataset size</div>
+        <div class="target-grid" id="tg-text">
+          <button class="tgt-btn" data-gb="0.5" onclick="setTarget('text',this)"><span class="tgt-name">500 MB</span></button>
+          <button class="tgt-btn active" data-gb="1" onclick="setTarget('text',this)"><span class="tgt-name">1 GB</span></button>
+          <button class="tgt-btn" data-gb="2" onclick="setTarget('text',this)"><span class="tgt-name">2 GB</span></button>
+          <button class="tgt-btn" data-gb="5" onclick="setTarget('text',this)"><span class="tgt-name">5 GB</span></button>
+          <button class="tgt-btn" data-gb="10" onclick="setTarget('text',this)"><span class="tgt-name">10 GB</span></button>
+          <button class="tgt-btn" data-gb="custom" onclick="setTarget('text',this)"><span class="tgt-name">✏ Custom</span></button>
+        </div>
+        <div class="hidden" id="cg-text">
+          <input type="number" class="custom-input" id="cgval-text" placeholder="Enter GB e.g. 50" min="0.1" max="10000" step="0.1"/>
+        </div>
+        <div class="target-hint" id="th-text">Runs for up to 5 minutes. Results are saved when the time or collection-size limit is reached.</div>
+      </div>
+      <div class="field">
+        <div class="field-label">Topic clusters <span class="val" id="cv-text">5</span></div>
+        <div class="slider-row">
+          <input type="range" class="slider" min="2" max="15" value="5" oninput="document.getElementById('cv-text').textContent=this.value"/>
+          <span class="slider-val">2–15</span>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Relevance filter <span class="val" id="rv-text">30%</span></div>
+        <div class="slider-row">
+          <input type="range" class="slider" id="fl-text" min="0" max="100" value="30" step="5"
+                 oninput="document.getElementById('rv-text').textContent=this.value+'%'"/>
+          <span class="slider-val" style="color:var(--muted)">strict</span>
+        </div>
+      </div>
+      <button class="run-btn" id="rb-text" onclick="run('text')">
+        <span>▶</span> Generate dataset
+        <span class="godmode-badge">AI</span>
+      </button>
+    </aside>
+    <div class="main-col">
+      <div class="terminal-area">
+        <div class="terminal-head">
+          <div class="terminal-label"><span class="pip" id="pip-text"></span>Pipeline log</div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:0.55rem;color:var(--muted2)" id="jid-text"></span>
+        </div>
+        <div class="terminal-box">
+          <div class="t-bar"><div class="t-circle r"></div><div class="t-circle y"></div><div class="t-circle g"></div><span class="t-id" id="tl-text">idle</span></div>
+          <div class="t-body" id="tb-text">
+            <div class="ll hi">DataForge GODMODE — Text pipeline</div>
+            <div class="ll">Topic search → source discovery → relevance filter → text labels</div>
+            <div class="ll" style="color:#2a2a2a">Output: text_dataset.csv + .json + .jsonl</div>
+            <div class="ll"><span class="cursor"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="prog-bar-area">
+        <div class="prog-meta"><span id="pl-text">Ready</span><span class="prog-pct" id="pp-text">0%</span></div>
+        <div class="prog-track"><div class="prog-fill" id="pf-text"></div></div>
+      </div>
+      <div class="results" id="res-text">
+        <div class="results-title">✓ Text dataset ready</div>
+        <div class="stat-grid">
+          <div class="stat-box"><span class="stat-num" id="sv-text-a">—</span><span class="stat-label">Articles</span></div>
+          <div class="stat-box"><span class="stat-num" id="sv-text-w">—</span><span class="stat-label">Words</span></div>
+          <div class="stat-box"><span class="stat-num" id="sv-text-f">—</span><span class="stat-label">Filtered out</span></div>
+          <div class="stat-box"><span class="stat-num" id="sv-text-s">—</span><span class="stat-label">Size</span></div>
+        </div>
+        <div class="filter-row">✓ <span id="ff-text">0</span> irrelevant pages blocked · AI keyword filtering active</div>
+        <div class="section-label">Sentiment</div>
+        <div class="sent-bar"><div class="s-p" id="sp-t" style="flex:0"></div><div class="s-n" id="sn-t" style="flex:0"></div><div class="s-u" id="su-t" style="flex:1"></div></div>
+        <div class="sent-nums"><span style="color:#4ade80">Positive <span id="spp-t">—</span></span><span>Neutral <span id="snup-t">—</span></span><span style="color:#f87171">Negative <span id="snp-t">—</span></span></div>
+        <div class="section-label" style="margin-top:1rem">Top domains</div>
+        <div id="dl-text"></div>
+        <div class="contents" style="margin-top:1rem">
+          <strong>text_dataset.csv</strong> — collected text, source URL, word count, sentiment, and topic cluster<br>
+          <strong>text_dataset.json</strong> — the same records in JSON format<br>
+          <strong>text_dataset.jsonl</strong> — one JSON record per line
+        </div>
+        <a class="dl-btn" id="dlb-text" href="#" onclick="dlf(event,'text')">
+          <div class="dl-left"><span class="dl-icon">📄</span><div><span class="dl-title">Download text dataset</span><span class="dl-sub" id="dls-text">ZIP — CSV, JSON, and JSONL</span></div></div>
+          <span class="dl-arrow">↓ download</span>
+        </a>
+        <div class="dl-hint">Enable "Ask where to save" in browser → choose your folder</div>
+        <div class="catalog-panel"><div class="section-label">Related dataset sources</div><div class="catalog-note" id="catalog-status-text">Suggestions from public dataset catalogs will appear here.</div><div class="catalog-grid" id="catalog-text"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- IMAGE -->
+<div class="section s-image" id="s-image">
+  <div class="hero-bar">
+    <div class="hero-title">Image Dataset</div>
+    <div class="hero-sub">Searches for image sources → checks matching files → downloads images → exports CSV and JSON metadata</div>
+  </div>
+  <div class="workspace">
+    <aside class="sidebar">
+      <div class="field">
+        <div class="field-label">Topic — what images?</div>
+        <textarea class="topic-box" id="t-image" placeholder="Be specific for best results&#10;e.g. crop disease leaf spots brown&#10;e.g. chest X-ray pneumonia scans&#10;e.g. satellite deforestation aerial" rows="4"></textarea>
+        <div class="suggestions">
+          <span class="sugg" onclick="setT('t-image',this)">crop disease leaf</span>
+          <span class="sugg" onclick="setT('t-image',this)">chest X-ray scans</span>
+          <span class="sugg" onclick="setT('t-image',this)">satellite imagery</span>
+          <span class="sugg" onclick="setT('t-image',this)">wildlife animals</span>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Image formats</div>
+        <div class="fmt-pills">
+          <label class="fmt-pill"><input type="checkbox" checked name="imgf" value=".jpg"><span class="pill-dot"></span>JPG</label>
+          <label class="fmt-pill"><input type="checkbox" checked name="imgf" value=".png"><span class="pill-dot"></span>PNG</label>
+          <label class="fmt-pill"><input type="checkbox" checked name="imgf" value=".webp"><span class="pill-dot"></span>WEBP</label>
+          <label class="fmt-pill"><input type="checkbox" name="imgf" value=".jpeg"><span class="pill-dot"></span>JPEG</label>
+          <label class="fmt-pill"><input type="checkbox" name="imgf" value=".jfif"><span class="pill-dot"></span>JFIF</label>
+          <label class="fmt-pill"><input type="checkbox" name="imgf" value=".gif"><span class="pill-dot"></span>GIF</label>
+          <label class="fmt-pill"><input type="checkbox" name="imgf" value=".bmp"><span class="pill-dot"></span>BMP</label>
+          <label class="fmt-pill"><input type="checkbox" name="imgf" value=".tiff"><span class="pill-dot"></span>TIFF</label>
+          <label class="fmt-pill"><input type="checkbox" name="imgf" value=".avif"><span class="pill-dot"></span>AVIF</label>
+          <label class="fmt-pill"><input type="checkbox" name="imgf" value=".heic"><span class="pill-dot"></span>HEIC</label>
+          <label class="fmt-pill"><input type="checkbox" name="imgf" value=".heif"><span class="pill-dot"></span>HEIF</label>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Target dataset size</div>
+        <div class="target-grid" id="tg-image">
+          <button class="tgt-btn" data-gb="0.5" onclick="setTarget('image',this)"><span class="tgt-name">500 MB</span></button>
+          <button class="tgt-btn active" data-gb="1" onclick="setTarget('image',this)"><span class="tgt-name">1 GB</span></button>
+          <button class="tgt-btn" data-gb="2" onclick="setTarget('image',this)"><span class="tgt-name">2 GB</span></button>
+          <button class="tgt-btn" data-gb="5" onclick="setTarget('image',this)"><span class="tgt-name">5 GB</span></button>
+          <button class="tgt-btn" data-gb="10" onclick="setTarget('image',this)"><span class="tgt-name">10 GB</span></button>
+          <button class="tgt-btn" data-gb="custom" onclick="setTarget('image',this)"><span class="tgt-name">✏ Custom</span></button>
+        </div>
+        <div class="hidden" id="cg-image">
+          <input type="number" class="custom-input" id="cgval-image" placeholder="Enter GB e.g. 50" min="0.1" max="10000" step="0.1"/>
+        </div>
+        <div class="target-hint" id="th-image">Runs for up to 5 minutes. Results are saved when the time or collection-size limit is reached.</div>
+      </div>
+      <div class="field">
+        <div class="field-label">Relevance filter <span class="val" id="rv-image">30%</span></div>
+        <div class="slider-row">
+          <input type="range" class="slider" id="fl-image" min="0" max="100" value="30" step="5"
+                 oninput="document.getElementById('rv-image').textContent=this.value+'%'"/>
+          <span class="slider-val" style="color:var(--muted)">strict</span>
+        </div>
+      </div>
+      <button class="run-btn" id="rb-image" onclick="run('image')">
+        <span>⬚</span> Collect images
+        <span class="godmode-badge">AI</span>
+      </button>
+    </aside>
+    <div class="main-col">
+      <div class="terminal-area">
+        <div class="terminal-head">
+          <div class="terminal-label"><span class="pip" id="pip-image"></span>Image crawler log</div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:0.55rem;color:var(--muted2)" id="jid-image"></span>
+        </div>
+        <div class="terminal-box">
+          <div class="t-bar"><div class="t-circle r"></div><div class="t-circle y"></div><div class="t-circle g"></div><span class="t-id" id="tl-image">idle</span></div>
+          <div class="t-body" id="tb-image">
+            <div class="ll hi">DataForge GODMODE — Image pipeline</div>
+            <div class="ll">Image search → checks source text and image context → downloads matching files</div>
+            <div class="ll" style="color:#2a2a2a">Output: images/ folder + image_dataset.csv + .json</div>
+            <div class="ll"><span class="cursor"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="prog-bar-area">
+        <div class="prog-meta"><span id="pl-image">Ready</span><span class="prog-pct" id="pp-image">0%</span></div>
+        <div class="prog-track"><div class="prog-fill" id="pf-image"></div></div>
+      </div>
+      <div class="results" id="res-image">
+        <div class="results-title">✓ Image dataset ready</div>
+        <div class="stat-grid">
+          <div class="stat-box"><span class="stat-num" id="sv-img-c">—</span><span class="stat-label">Images</span></div>
+          <div class="stat-box"><span class="stat-num" id="sv-img-p">—</span><span class="stat-label">Pages crawled</span></div>
+          <div class="stat-box"><span class="stat-num" id="sv-img-f">—</span><span class="stat-label">Filtered out</span></div>
+          <div class="stat-box"><span class="stat-num" id="sv-img-s">—</span><span class="stat-label">ZIP size</span></div>
+        </div>
+        <div class="filter-row">✓ <span id="ff-image">0</span> irrelevant images blocked · checked alt text, context, page relevance</div>
+        <div class="section-label">Top domains</div>
+        <div id="dl-image"></div>
+        <div class="contents" style="margin-top:1rem">
+          <strong>images/</strong> — all downloaded image files (.jpg .png .webp)<br>
+          <strong>image_dataset.csv / .json</strong> — topic, source page, filename, format, description, and file size<br>
+        </div>
+        <a class="dl-btn" id="dlb-image" href="#" onclick="dlf(event,'image')">
+          <div class="dl-left"><span class="dl-icon">🖼</span><div><span class="dl-title">Download image dataset</span><span class="dl-sub" id="dls-image">ZIP — images/ + metadata files</span></div></div>
+          <span class="dl-arrow">↓ download</span>
+        </a>
+        <div class="dl-hint">Enable "Ask where to save" in browser → choose your folder</div>
+        <div class="catalog-panel"><div class="section-label">Related dataset sources</div><div class="catalog-note" id="catalog-status-image">Suggestions from public dataset catalogs will appear here.</div><div class="catalog-grid" id="catalog-image"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AUDIO -->
+<div class="section s-audio" id="s-audio">
+  <div class="hero-bar">
+    <div class="hero-title">Audio Dataset</div>
+    <div class="hero-sub">Searches Freesound and Archive.org → checks topic relevance → downloads supported audio files</div>
+  </div>
+  <div class="workspace">
+    <aside class="sidebar">
+      <div class="field">
+        <div class="field-label">Topic — what audio?</div>
+        <textarea class="topic-box" id="t-audio" placeholder="Be specific for best results&#10;e.g. bird call recordings tropical forest&#10;e.g. english speech interviews podcast&#10;e.g. classical violin solo recordings" rows="4"></textarea>
+        <div class="suggestions">
+          <span class="sugg" onclick="setT('t-audio',this)">bird calls forest</span>
+          <span class="sugg" onclick="setT('t-audio',this)">english speech</span>
+          <span class="sugg" onclick="setT('t-audio',this)">piano classical</span>
+          <span class="sugg" onclick="setT('t-audio',this)">ambient rain sounds</span>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Audio formats</div>
+        <div class="fmt-pills">
+          <label class="fmt-pill"><input type="checkbox" checked name="af" value=".mp3"><span class="pill-dot"></span>MP3</label>
+          <label class="fmt-pill"><input type="checkbox" checked name="af" value=".wav"><span class="pill-dot"></span>WAV</label>
+          <label class="fmt-pill"><input type="checkbox" name="af" value=".ogg"><span class="pill-dot"></span>OGG</label>
+          <label class="fmt-pill"><input type="checkbox" name="af" value=".flac"><span class="pill-dot"></span>FLAC</label>
+          <label class="fmt-pill"><input type="checkbox" name="af" value=".m4a"><span class="pill-dot"></span>M4A</label>
+          <label class="fmt-pill"><input type="checkbox" name="af" value=".aac"><span class="pill-dot"></span>AAC</label>
+          <label class="fmt-pill"><input type="checkbox" name="af" value=".opus"><span class="pill-dot"></span>OPUS</label>
+          <label class="fmt-pill"><input type="checkbox" name="af" value=".aiff"><span class="pill-dot"></span>AIFF</label>
+          <label class="fmt-pill"><input type="checkbox" name="af" value=".aif"><span class="pill-dot"></span>AIF</label>
+          <label class="fmt-pill"><input type="checkbox" name="af" value=".wma"><span class="pill-dot"></span>WMA</label>
+          <label class="fmt-pill"><input type="checkbox" name="af" value=".mid"><span class="pill-dot"></span>MIDI</label>
+          <label class="fmt-pill"><input type="checkbox" name="af" value=".midi"><span class="pill-dot"></span>MIDI</label>
+          <label class="fmt-pill"><input type="checkbox" name="af" value=".amr"><span class="pill-dot"></span>AMR</label>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Target dataset size</div>
+        <div class="target-grid" id="tg-audio">
+          <button class="tgt-btn" data-gb="0.5" onclick="setTarget('audio',this)"><span class="tgt-name">500 MB</span></button>
+          <button class="tgt-btn active" data-gb="1" onclick="setTarget('audio',this)"><span class="tgt-name">1 GB</span></button>
+          <button class="tgt-btn" data-gb="2" onclick="setTarget('audio',this)"><span class="tgt-name">2 GB</span></button>
+          <button class="tgt-btn" data-gb="5" onclick="setTarget('audio',this)"><span class="tgt-name">5 GB</span></button>
+          <button class="tgt-btn" data-gb="10" onclick="setTarget('audio',this)"><span class="tgt-name">10 GB</span></button>
+          <button class="tgt-btn" data-gb="custom" onclick="setTarget('audio',this)"><span class="tgt-name">✏ Custom</span></button>
+        </div>
+        <div class="hidden" id="cg-audio">
+          <input type="number" class="custom-input" id="cgval-audio" placeholder="Enter GB e.g. 50" min="0.1" max="10000" step="0.1"/>
+        </div>
+        <div class="target-hint" id="th-audio">Runs for up to 5 minutes. Results are saved when the time or collection-size limit is reached.</div>
+      </div>
+      <div class="field">
+        <div class="field-label">Relevance filter <span class="val" id="rv-audio">30%</span></div>
+        <div class="slider-row">
+          <input type="range" class="slider" id="fl-audio" min="0" max="100" value="30" step="5"
+                 oninput="document.getElementById('rv-audio').textContent=this.value+'%'"/>
+          <span class="slider-val" style="color:var(--muted)">strict</span>
+        </div>
+      </div>
+      <button class="run-btn" id="rb-audio" onclick="run('audio')">
+        <span>♪</span> Collect audio
+        <span class="godmode-badge">AI</span>
+      </button>
+    </aside>
+    <div class="main-col">
+      <div class="terminal-area">
+        <div class="terminal-head">
+          <div class="terminal-label"><span class="pip" id="pip-audio"></span>Audio crawler log</div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:0.55rem;color:var(--muted2)" id="jid-audio"></span>
+        </div>
+        <div class="terminal-box">
+          <div class="t-bar"><div class="t-circle r"></div><div class="t-circle y"></div><div class="t-circle g"></div><span class="t-id" id="tl-audio">idle</span></div>
+          <div class="t-body" id="tb-audio">
+            <div class="ll hi">DataForge GODMODE — Audio pipeline</div>
+            <div class="ll">Audio search → source and file checks → download</div>
+            <div class="ll" style="color:#2a2a2a">Output: audio/ folder + audio_dataset.csv + .json</div>
+            <div class="ll"><span class="cursor"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="prog-bar-area">
+        <div class="prog-meta"><span id="pl-audio">Ready</span><span class="prog-pct" id="pp-audio">0%</span></div>
+        <div class="prog-track"><div class="prog-fill" id="pf-audio"></div></div>
+      </div>
+      <div class="results" id="res-audio">
+        <div class="results-title">✓ Audio dataset ready</div>
+        <div class="stat-grid">
+          <div class="stat-box"><span class="stat-num" id="sv-aud-c">—</span><span class="stat-label">Audio files</span></div>
+          <div class="stat-box"><span class="stat-num" id="sv-aud-p">—</span><span class="stat-label">Pages crawled</span></div>
+          <div class="stat-box"><span class="stat-num" id="sv-aud-f">—</span><span class="stat-label">Filtered out</span></div>
+          <div class="stat-box"><span class="stat-num" id="sv-aud-s">—</span><span class="stat-label">ZIP size</span></div>
+        </div>
+        <div class="filter-row">✓ <span id="ff-audio">0</span> irrelevant audio files blocked · content-type verified</div>
+        <div class="section-label">Top domains</div>
+        <div id="dl-audio"></div>
+        <div class="contents" style="margin-top:1rem">
+          <strong>audio/</strong> — all downloaded audio files (.mp3 .wav .ogg .flac)<br>
+          <strong>audio_dataset.csv / .json</strong> — topic, source page, filename, format, description, and file size<br>
+        </div>
+        <a class="dl-btn" id="dlb-audio" href="#" onclick="dlf(event,'audio')">
+          <div class="dl-left"><span class="dl-icon">♪</span><div><span class="dl-title">Download audio dataset</span><span class="dl-sub" id="dls-audio">ZIP — audio/ + metadata files</span></div></div>
+          <span class="dl-arrow">↓ download</span>
+        </a>
+        <div class="dl-hint">Enable "Ask where to save" in browser → choose your folder</div>
+        <div class="catalog-panel"><div class="section-label">Related dataset sources</div><div class="catalog-note" id="catalog-status-audio">Suggestions from public dataset catalogs will appear here.</div><div class="catalog-grid" id="catalog-audio"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VIDEO -->
+<div class="section s-video" id="s-video">
+  <div class="hero-bar">
+    <div class="hero-title">Video Dataset</div>
+    <div class="hero-sub">Searches web and Archive.org sources → checks topic relevance → downloads supported video files</div>
+  </div>
+  <div class="workspace">
+    <aside class="sidebar">
+      <div class="field">
+        <div class="field-label">Topic — what video?</div>
+        <textarea class="topic-box" id="t-video" placeholder="Be specific for best results&#10;e.g. drone footage amazon rainforest&#10;e.g. documentary ocean life coral reef&#10;e.g. news clips climate protest 2024" rows="4"></textarea>
+        <div class="suggestions">
+          <span class="sugg" onclick="setT('t-video',this)">drone nature footage</span>
+          <span class="sugg" onclick="setT('t-video',this)">wildlife documentary</span>
+          <span class="sugg" onclick="setT('t-video',this)">sports highlights</span>
+          <span class="sugg" onclick="setT('t-video',this)">news clips 2024</span>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Video formats</div>
+        <div class="fmt-pills">
+          <label class="fmt-pill"><input type="checkbox" checked name="vf" value=".mp4"><span class="pill-dot"></span>MP4</label>
+          <label class="fmt-pill"><input type="checkbox" checked name="vf" value=".webm"><span class="pill-dot"></span>WEBM</label>
+          <label class="fmt-pill"><input type="checkbox" name="vf" value=".avi"><span class="pill-dot"></span>AVI</label>
+          <label class="fmt-pill"><input type="checkbox" name="vf" value=".mov"><span class="pill-dot"></span>MOV</label>
+          <label class="fmt-pill"><input type="checkbox" name="vf" value=".mkv"><span class="pill-dot"></span>MKV</label>
+          <label class="fmt-pill"><input type="checkbox" name="vf" value=".m4v"><span class="pill-dot"></span>M4V</label>
+          <label class="fmt-pill"><input type="checkbox" name="vf" value=".mpeg"><span class="pill-dot"></span>MPEG</label>
+          <label class="fmt-pill"><input type="checkbox" name="vf" value=".mpg"><span class="pill-dot"></span>MPG</label>
+          <label class="fmt-pill"><input type="checkbox" name="vf" value=".3gp"><span class="pill-dot"></span>3GP</label>
+          <label class="fmt-pill"><input type="checkbox" name="vf" value=".ts"><span class="pill-dot"></span>TS</label>
+          <label class="fmt-pill"><input type="checkbox" name="vf" value=".m2ts"><span class="pill-dot"></span>M2TS</label>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Target dataset size</div>
+        <div class="target-grid" id="tg-video">
+          <button class="tgt-btn" data-gb="0.5" onclick="setTarget('video',this)"><span class="tgt-name">500 MB</span></button>
+          <button class="tgt-btn active" data-gb="1" onclick="setTarget('video',this)"><span class="tgt-name">1 GB</span></button>
+          <button class="tgt-btn" data-gb="2" onclick="setTarget('video',this)"><span class="tgt-name">2 GB</span></button>
+          <button class="tgt-btn" data-gb="5" onclick="setTarget('video',this)"><span class="tgt-name">5 GB</span></button>
+          <button class="tgt-btn" data-gb="10" onclick="setTarget('video',this)"><span class="tgt-name">10 GB</span></button>
+          <button class="tgt-btn" data-gb="custom" onclick="setTarget('video',this)"><span class="tgt-name">✏ Custom</span></button>
+        </div>
+        <div class="hidden" id="cg-video">
+          <input type="number" class="custom-input" id="cgval-video" placeholder="Enter GB e.g. 50" min="0.1" max="10000" step="0.1"/>
+        </div>
+        <div class="target-hint" id="th-video">Runs for up to 5 minutes. Results are saved when the time or collection-size limit is reached.</div>
+      </div>
+      <div class="field">
+        <div class="field-label">Relevance filter <span class="val" id="rv-video">30%</span></div>
+        <div class="slider-row">
+          <input type="range" class="slider" id="fl-video" min="0" max="100" value="30" step="5"
+                 oninput="document.getElementById('rv-video').textContent=this.value+'%'"/>
+          <span class="slider-val" style="color:var(--muted)">strict</span>
+        </div>
+      </div>
+      <button class="run-btn" id="rb-video" onclick="run('video')">
+        <span>▷</span> Collect video
+        <span class="godmode-badge">AI</span>
+      </button>
+    </aside>
+    <div class="main-col">
+      <div class="terminal-area">
+        <div class="terminal-head">
+          <div class="terminal-label"><span class="pip" id="pip-video"></span>Video crawler log</div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:0.55rem;color:var(--muted2)" id="jid-video"></span>
+        </div>
+        <div class="terminal-box">
+          <div class="t-bar"><div class="t-circle r"></div><div class="t-circle y"></div><div class="t-circle g"></div><span class="t-id" id="tl-video">idle</span></div>
+          <div class="t-body" id="tb-video">
+            <div class="ll hi">DataForge GODMODE — Video pipeline</div>
+            <div class="ll">AI optimized for video → Archive.org + video directories → content-type verified → downloads</div>
+            <div class="ll" style="color:#2a2a2a">Output: videos/ folder + video_dataset.csv + .json</div>
+            <div class="ll"><span class="cursor"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="prog-bar-area">
+        <div class="prog-meta"><span id="pl-video">Ready</span><span class="prog-pct" id="pp-video">0%</span></div>
+        <div class="prog-track"><div class="prog-fill" id="pf-video"></div></div>
+      </div>
+      <div class="results" id="res-video">
+        <div class="results-title">✓ Video dataset ready</div>
+        <div class="stat-grid">
+          <div class="stat-box"><span class="stat-num" id="sv-vid-c">—</span><span class="stat-label">Video files</span></div>
+          <div class="stat-box"><span class="stat-num" id="sv-vid-p">—</span><span class="stat-label">Pages crawled</span></div>
+          <div class="stat-box"><span class="stat-num" id="sv-vid-f">—</span><span class="stat-label">Filtered out</span></div>
+          <div class="stat-box"><span class="stat-num" id="sv-vid-s">—</span><span class="stat-label">ZIP size</span></div>
+        </div>
+        <div class="filter-row">✓ <span id="ff-video">0</span> irrelevant video files blocked · content-type + size verified</div>
+        <div class="section-label">Top domains</div>
+        <div id="dl-video"></div>
+        <div class="contents" style="margin-top:1rem">
+          <strong>videos/</strong> — all downloaded video files (.mp4 .webm .mov)<br>
+          <strong>video_dataset.csv / .json</strong> — topic, source page, filename, format, description, and file size<br>
+        </div>
+        <a class="dl-btn" id="dlb-video" href="#" onclick="dlf(event,'video')">
+          <div class="dl-left"><span class="dl-icon">▷</span><div><span class="dl-title">Download video dataset</span><span class="dl-sub" id="dls-video">ZIP — videos/ + metadata files</span></div></div>
+          <span class="dl-arrow">↓ download</span>
+        </a>
+        <div class="dl-hint">Enable "Ask where to save" in browser → choose your folder</div>
+        <div class="catalog-panel"><div class="section-label">Related dataset sources</div><div class="catalog-note" id="catalog-status-video">Suggestions from public dataset catalogs will appear here.</div><div class="catalog-grid" id="catalog-video"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>DataForge GODMODE — AI Dataset Generation Platform</span>
+  <span>Text · Images · Audio · Video · Runs locally · v5.0</span>
+</footer>
+
+<script>
+const DEFAULT_TIME_LIMIT_SECONDS = {{ job_runtime_seconds|tojson }};
+const S = {
+  text:  {preset:'medium',jobId:null,poll:null,seen:0,suggestionKey:''},
+  image: {preset:'medium',jobId:null,poll:null,seen:0,suggestionKey:''},
+  audio: {preset:'medium',jobId:null,poll:null,seen:0,suggestionKey:''},
+  video: {preset:'medium',jobId:null,poll:null,seen:0,suggestionKey:''},
+};
+
+const BTN = {
+  text:  {icon:'▶',  label:'Generate dataset'},
+  image: {icon:'⬚', label:'Collect images'},
+  audio: {icon:'♪',  label:'Collect audio'},
+  video: {icon:'▷',  label:'Collect video'},
+};
+
+function switchTab(m,btn){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('s-'+m).classList.add('active');
+}
+
+function setT(id,el){document.getElementById(id).value=el.textContent;}
+
+function setSz(m,btn){
+  document.querySelectorAll('#sz-'+m+' .sz-pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  S[m].preset=btn.dataset.p;
+}
+
+function lc(msg){
+  if(msg.includes('✅')||msg.includes('🎉')||msg.includes('complete')) return 'ok';
+  if(msg.includes('❌')||msg.includes('Error')) return 'er';
+  if(msg.includes('🚀')||msg.includes('GODMODE')||msg.includes('pipeline')) return 'hi';
+  if(msg.includes('✨')||msg.includes('🧠')||msg.includes('AI')||msg.includes('expanded')) return 'gold';
+  if(msg.includes('⚠️')||msg.includes('filter')||msg.includes('blocked')) return 'warn';
+  if(msg.includes('🌐')||msg.includes('🕷️')||msg.includes('Crawling')) return 'blue';
+  return '';
+}
+
+function addLog(m,e){
+  const b=document.getElementById('tb-'+m);
+  const c=b.querySelector('.ll:last-child .cursor');
+  if(c) c.parentElement.remove();
+  const d=document.createElement('div');
+  d.className='ll '+lc(e.msg);
+  const stamp=document.createElement('span');
+  stamp.className='lts'; stamp.textContent=e.ts||'';
+  d.appendChild(stamp);
+  d.appendChild(document.createTextNode(String(e.msg||'')));
+  b.appendChild(d);
+  const cl=document.createElement('div');
+  cl.className='ll';
+  const cursor=document.createElement('span'); cursor.className='cursor';
+  cl.appendChild(cursor);
+  b.appendChild(cl);
+  b.scrollTop=b.scrollHeight;
+}
+
+async function run(m){
+  const topic=document.getElementById('t-'+m).value.trim();
+  if(!topic){alert('Please enter a topic.');return;}
+  const btn=document.getElementById('rb-'+m);
+  btn.disabled=true;
+  btn.innerHTML=`<span>⏳</span> Running... <span class="godmode-badge">AI</span>`;
+  document.getElementById('res-'+m).classList.remove('show');
+  document.getElementById('pf-'+m).style.width='0%';
+  document.getElementById('pp-'+m).textContent='0%';
+  S[m].seen=0;
+  S[m].suggestionKey='';
+  renderSuggestions(m,[],[]);
+  const tb=document.getElementById('tb-'+m);
+  tb.innerHTML=`<div class="ll gold">▶ Starting collection job...</div><div class="ll"><span class="cursor"></span></div>`;
+
+  const fmtNames={text:'tf',image:'imgf',audio:'af',video:'vf'};
+  const fmts=[...document.querySelectorAll(`input[name="${fmtNames[m]}"]:checked`)].map(i=>i.value);
+  const textFmts=[...document.querySelectorAll('input[name="tf"]:checked')].map(i=>i.value);
+   const relevanceSlider=document.getElementById('fl-'+m);
+   const minRel=(relevanceSlider?Number(relevanceSlider.value):30)/100;
+  const clusters=parseInt(document.getElementById('cv-text')?.textContent||'5',10)||5;
+
+  try{
+    const tgb = typeof getTargetGb === 'function' ? getTargetGb(m) : 1;
+    S[m].startTime = Date.now();
+    const r=await fetch('/api/start',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({topic,mode:m,size_preset:S[m].preset,num_clusters:clusters||5,
+        delay:0.3,formats:fmts,text_formats:textFmts,min_relevance:minRel,target_gb:tgb})});
+    const d=await r.json();
+    if(!r.ok||d.error){alert(d.error||`Could not start the job (HTTP ${r.status}).`);resetBtn(m);return;}
+    S[m].jobId=d.job_id;
+    S[m].timeLimit=d.time_limit_seconds||300;
+    document.getElementById('pip-'+m).className='pip run';
+    document.getElementById('tl-'+m).textContent='job:'+d.job_id;
+    document.getElementById('jid-'+m).textContent=d.job_id;
+    if(S[m].poll)clearInterval(S[m].poll);
+    S[m].poll=setInterval(()=>poll(m),1500);
+  }catch(e){alert(`Could not connect to DataForge: ${e.message}`);resetBtn(m);}
+}
+
+function resetBtn(m){
+  const btn=document.getElementById('rb-'+m);
+  btn.disabled=false;
+  btn.innerHTML=`<span>${BTN[m].icon}</span> ${BTN[m].label} <span class="godmode-badge">AI</span>`;
+}
+
+async function poll(m){
+  const jid=S[m].jobId;
+  if(!jid)return;
+  try{
+    const r=await fetch('/api/status/'+jid);
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error||`Status request failed (HTTP ${r.status}).`);
+    const logs=Array.isArray(d.logs)?d.logs:[];
+    logs.slice(S[m].seen).forEach(e=>addLog(m,e));
+    S[m].seen=logs.length;
+    renderSuggestions(m,d.suggestions||[],d.catalog_status||[]);
+    const pct=d.progress||0;
+    document.getElementById('pf-'+m).style.width=pct+'%';
+    document.getElementById('pp-'+m).textContent=pct+'%';
+    if(d.target_bytes) updateFuelGauge(d.collected_bytes||0, d.target_bytes, m, S[m].startTime,d.scraped||0,d.sources||0);
+    document.getElementById('pl-'+m).textContent=d.scraped?`${d.scraped} pages crawled`:'Analyzing topic...';
+    if(d.status==='done'){
+      clearInterval(S[m].poll);
+      document.getElementById('pip-'+m).className='pip done';
+      const fo=document.getElementById('fuel-overlay'); if(fo) fo.classList.remove('visible');
+      document.getElementById('tl-'+m).textContent='complete';
+      resetBtn(m);
+      const title=document.querySelector(`#res-${m} .results-title`);
+      if(title){
+        const targetNotReached=Number(d.target_bytes||0)>Number(d.collected_bytes||0);
+        title.textContent=d.timed_out?'✓ Partial dataset ready — time limit reached':
+          d.size_limited?'✓ Partial dataset ready — collection-size limit reached':
+          d.sources_exhausted?'✓ Partial dataset ready — no new results from configured indexes':
+          targetNotReached?'✓ Partial dataset ready — requested size not reached':'✓ Dataset ready';
+      }
+      showRes(m,d.stats,d.filename);
+    }else if(d.status==='error'){
+      clearInterval(S[m].poll);
+      const fo=document.getElementById('fuel-overlay'); if(fo) fo.classList.remove('visible');
+      document.getElementById('pip-'+m).className='pip err';
+      document.getElementById('tl-'+m).textContent='error';
+      resetBtn(m);
+      const detail=d.error?` DataForge: ${d.error}`:'';
+      if(detail) addLog(m,{ts:'',msg:`✕ Job failed.${detail}`});
+    }
+  }catch(e){console.error(e);}
+}
+
+function fsz(mb){if(!mb||mb===0)return '0 B';return mb>=1000?(mb/1024).toFixed(2)+' GB':mb.toFixed(1)+' MB';}
+
+function showRes(m,stats,fn){
+  if(!stats)return;
+  document.getElementById('res-'+m).classList.add('show');
+  if(m==='text'){
+    document.getElementById('sv-text-a').textContent=(stats.pages||0).toLocaleString();
+    document.getElementById('sv-text-w').textContent=((stats.words||0)/1000).toFixed(1)+'K';
+    document.getElementById('sv-text-f').textContent=(stats.filtered||0).toLocaleString();
+    document.getElementById('sv-text-s').textContent=fsz(stats.size_mb);
+    document.getElementById('ff-text').textContent=stats.filtered||0;
+    // Sentiment
+    const tot=(stats.sentiment_pos||0)+(stats.sentiment_neg||0)+(stats.sentiment_neu||0);
+    const pF=tot?stats.sentiment_pos/tot:0,nF=tot?stats.sentiment_neg/tot:0,uF=tot?stats.sentiment_neu/tot:0;
+    setTimeout(()=>{document.getElementById('sp-t').style.flex=pF||0.001;document.getElementById('sn-t').style.flex=nF||0.001;document.getElementById('su-t').style.flex=uF||0.001;},100);
+    document.getElementById('spp-t').textContent=Math.round(pF*100)+'%';
+    document.getElementById('snp-t').textContent=Math.round(nF*100)+'%';
+    document.getElementById('snup-t').textContent=Math.round(uF*100)+'%';
+    renderDoms('dl-text',stats.top_domains);
+    document.getElementById('dls-text').textContent=fsz(stats.zip_mb||stats.size_mb)+' ZIP';
+  }else if(m==='image'){
+    document.getElementById('sv-img-c').textContent=(stats.images||0).toLocaleString();
+    document.getElementById('sv-img-p').textContent=(stats.pages||0).toLocaleString();
+    document.getElementById('sv-img-f').textContent=(stats.filtered||0).toLocaleString();
+    document.getElementById('sv-img-s').textContent=fsz(stats.zip_mb||stats.size_mb);
+    document.getElementById('ff-image').textContent=stats.filtered||0;
+    renderDoms('dl-image',stats.top_domains);
+    document.getElementById('dls-image').textContent=fsz(stats.zip_mb||stats.size_mb)+' ZIP';
+  }else if(m==='audio'){
+    document.getElementById('sv-aud-c').textContent=(stats.audio_files||0).toLocaleString();
+    document.getElementById('sv-aud-p').textContent=(stats.pages||0).toLocaleString();
+    document.getElementById('sv-aud-f').textContent=(stats.filtered||0).toLocaleString();
+    document.getElementById('sv-aud-s').textContent=fsz(stats.zip_mb||stats.size_mb);
+    document.getElementById('ff-audio').textContent=stats.filtered||0;
+    renderDoms('dl-audio',stats.top_domains);
+    document.getElementById('dls-audio').textContent=fsz(stats.zip_mb||stats.size_mb)+' ZIP';
+  }else if(m==='video'){
+    document.getElementById('sv-vid-c').textContent=(stats.video_files||0).toLocaleString();
+    document.getElementById('sv-vid-p').textContent=(stats.pages||0).toLocaleString();
+    document.getElementById('sv-vid-f').textContent=(stats.filtered||0).toLocaleString();
+    document.getElementById('sv-vid-s').textContent=fsz(stats.zip_mb||stats.size_mb);
+    document.getElementById('ff-video').textContent=stats.filtered||0;
+    renderDoms('dl-video',stats.top_domains);
+    document.getElementById('dls-video').textContent=fsz(stats.zip_mb||stats.size_mb)+' ZIP';
+  }
+  if(fn) document.getElementById('dlb-'+m).dataset.fn=fn;
+}
+
+function renderDoms(id,doms){
+  const el=document.getElementById(id); el.replaceChildren();
+  const s=Object.entries(doms||{}).sort((a,b)=>b[1]-a[1]);
+  const mx=s[0]?.[1]||1;
+  s.forEach(([d,c])=>{
+    const row=document.createElement('div'); row.className='dom-row';
+    const name=document.createElement('span'); name.className='dom-name'; name.textContent=d;
+    const track=document.createElement('div'); track.className='dom-bar-w';
+    const bar=document.createElement('div'); bar.className='dom-bar';
+    bar.style.width=Math.max(0,Math.min(100,Math.round(c/mx*100)))+'%';
+    const count=document.createElement('span'); count.className='dom-count'; count.textContent=String(c);
+    track.appendChild(bar); row.append(name,track,count); el.appendChild(row);
+  });
+}
+
+function renderSuggestions(mode,suggestions,status){
+  const grid=document.getElementById('catalog-'+mode);
+  const note=document.getElementById('catalog-status-'+mode);
+  if(!grid||!note)return;
+  const rows=Array.isArray(suggestions)?suggestions:[];
+  const key=JSON.stringify([rows,status]);
+  if(S[mode].suggestionKey===key)return;
+  S[mode].suggestionKey=key;
+  grid.replaceChildren();
+  note.textContent=(Array.isArray(status)&&status.length)?status.join(' '):
+    (rows.length?'Open a source card to review dataset details and its download terms.':'Searching dataset catalogs…');
+  rows.forEach(item=>{
+    if(!item||typeof item.url!=='string'||!/^https?:\/\//i.test(item.url))return;
+    const card=document.createElement('a'); card.className='catalog-card';
+    card.href=item.url; card.target='_blank'; card.rel='noopener noreferrer';
+    const source=document.createElement('span'); source.className='catalog-source'; source.textContent=String(item.source||'Dataset source');
+    const title=document.createElement('span'); title.className='catalog-title'; title.textContent=String(item.title||'Open dataset source');
+    const desc=document.createElement('span'); desc.className='catalog-desc'; desc.textContent=String(item.description||'');
+    const score=document.createElement('span'); score.className='catalog-score';
+    score.textContent=item.source==='Google Dataset Search'?'Open catalog search':`Match score ${Math.round((Number(item.relevance)||0)*100)}%`;
+    card.append(source,title,desc,score); grid.appendChild(card);
+  });
+}
+
+function dlf(e,m){
+  e.preventDefault();
+  const jid=S[m].jobId; if(!jid)return;
+  const a=document.createElement('a');
+  a.href='/api/download/'+jid;
+  a.download=document.getElementById('dlb-'+m).dataset.fn||'dataset.zip';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+
+// ── TARGET SIZE ──
+const TARGET_GB = {text:1, image:1, audio:1, video:1};
+
+function runtimeLabel(seconds=DEFAULT_TIME_LIMIT_SECONDS) {
+  const mins=Math.floor(seconds/60), rem=seconds%60;
+  if(mins) return `${mins} min${mins===1?'':'s'}${rem?` ${rem}s`:''}`;
+  return `${seconds} seconds`;
+}
+
+function updateTargetHint(mode) {
+  const hint=document.getElementById('th-'+mode);
+  if(!hint) return;
+  const label=runtimeLabel(S[mode]?.timeLimit||DEFAULT_TIME_LIMIT_SECONDS);
+  const gb=TARGET_GB[mode];
+  if(gb==null) hint.textContent=`Choose a size target. Runs for up to ${label}; available results are saved.`;
+  else {
+    const size=gb>=1?`${gb} GB`:`${Math.round(gb*1024)} MB`;
+    hint.textContent=`${size} is a target. Runs for up to ${label}; available results are saved.`;
+  }
+}
+
+function setTarget(mode, btn) {
+  document.querySelectorAll('#tg-'+mode+' .tgt-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const gb = btn.dataset.gb;
+  const cg = document.getElementById('cg-'+mode);
+  if (gb === 'custom') {
+    if(cg){ cg.classList.remove('hidden'); cg.style.display='block'; }
+    TARGET_GB[mode] = null;
+    updateTargetHint(mode);
+  } else {
+    if(cg){ cg.classList.add('hidden'); cg.style.display='none'; }
+    TARGET_GB[mode] = parseFloat(gb);
+    updateTargetHint(mode);
+  }
+}
+
+['text','image','audio','video'].forEach(updateTargetHint);
+
+function getTargetGb(mode) {
+  const btn = document.querySelector('#tg-'+mode+' .tgt-btn.active');
+  if (!btn) return 1;
+  const gb = btn.dataset.gb;
+  if (gb === 'custom') {
+    const v = parseFloat(document.getElementById('cgval-'+mode)?.value||1);
+    return isNaN(v) ? 1 : v;
+  }
+  return parseFloat(gb);
+}
+
+// ── FUEL GAUGE ──
+function updateFuelGauge(collected_bytes, target_bytes, mode, startTime, pages=0, sources=0) {
+  const overlay = document.getElementById('fuel-overlay');
+  if (!overlay || !target_bytes) { if(overlay) overlay.classList.remove('visible'); return; }
+  overlay.classList.add('visible');
+
+  const el = id => document.getElementById(id);
+  const pct = Math.min(100, Math.round(collected_bytes / target_bytes * 100));
+  const mb = collected_bytes / (1024**2);
+  const tgb = target_bytes / (1024**3);
+
+  if(el('fuel-fill-main')) el('fuel-fill-main').style.height = pct + '%';
+  if(el('fuel-meter-main')) el('fuel-meter-main').style.width = pct + '%';
+  if(el('fuel-collected-main')) el('fuel-collected-main').textContent =
+    mb >= 1024 ? (mb/1024).toFixed(2)+' GB' : mb.toFixed(0)+' MB';
+  if(el('fuel-target-main')) el('fuel-target-main').textContent = 'TARGET / ' + (tgb>=1?tgb.toFixed(1)+' GB':(tgb*1024).toFixed(0)+' MB');
+  if(el('fuel-mode')) el('fuel-mode').textContent = mode.toUpperCase() + ' / ' + pct + '%';
+  if(el('fuel-pages-main')) el('fuel-pages-main').textContent = `${Number(pages).toLocaleString()} / ${Number(sources).toLocaleString()}`;
+
+  if (startTime) {
+    const elapsed = (Date.now() - startTime) / 1000;
+    const secondsLeft = Math.max(0, Math.ceil((S[mode]?.timeLimit||300) - elapsed));
+    const rate=collected_bytes/Math.max(1,elapsed);
+    const eta=rate>0?Math.ceil(Math.max(0,target_bytes-collected_bytes)/rate):null;
+    const rateLabel=rate>=1024**2?(rate/1024**2).toFixed(1)+' MB/s':(rate/1024).toFixed(0)+' KB/s';
+    if(el('fuel-rate-main')) el('fuel-rate-main').textContent=rateLabel;
+    if(el('fuel-eta-main')) el('fuel-eta-main').textContent=eta===null?'Waiting for data':`ETA ${eta<60?eta+'s':Math.ceil(eta/60)+'m'} · ${secondsLeft}s left`;
+  }
+}
+
+</script>
+
+<!-- One live tank widget; values are updated by the job-status poller. -->
+<aside id="fuel-overlay" class="tank-overlay" aria-live="polite" aria-label="Live dataset collection progress">
+  <div class="tank-head">
+    <div class="tank-brand"><span class="tank-icon" aria-hidden="true">✦</span><span>Dataset Tank</span></div>
+    <span id="fuel-mode" class="tank-mode">READY</span>
+  </div>
+  <div class="tank-layout">
+    <div class="tank-vessel" role="img" aria-label="Dataset size progress"><div id="fuel-fill-main" class="tank-liquid"></div></div>
+    <div class="tank-readout">
+      <div id="fuel-collected-main" class="tank-amount">0 MB</div>
+      <div id="fuel-target-main" class="tank-target">TARGET / 0 MB</div>
+      <div class="tank-meter"><div id="fuel-meter-main" class="tank-meter-fill"></div></div>
+      <div class="tank-data">
+        <div class="tank-data-item"><div class="tank-data-label">Pages / hosts</div><div id="fuel-pages-main" class="tank-data-value">0 / 0</div></div>
+        <div class="tank-data-item"><div class="tank-data-label">Average rate</div><div id="fuel-rate-main" class="tank-data-value">0 KB/s</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="tank-foot"><span>COLLECTED / REQUESTED</span><span id="fuel-eta-main">Waiting for data</span></div>
+</aside>
+
+</body>
+</html>

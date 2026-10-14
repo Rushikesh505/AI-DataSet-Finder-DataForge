@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>DataForge Pro — AI Dataset Generation Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --void:#060608;--deep:#0c0d12;--surface:#12141c;--surface2:#181b26;
+  --rim:#ffffff0d;--rim2:#ffffff18;--text:#f0eff5;--muted:#8a8a9a;--faint:#3a3a4a;
+  --gold:#e8b84b;--gold2:#f5d080;--teal:#2dd4c4;--rose:#f06090;--blue:#6090f5;
+}
+html{scroll-behavior:smooth}
+body{background:var(--void);color:var(--text);font-family:'Instrument Sans',sans-serif;line-height:1.6;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:999;opacity:.5}
+.grid-bg{position:fixed;inset:0;z-index:0;background-image:linear-gradient(var(--rim) 1px,transparent 1px),linear-gradient(90deg,var(--rim) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,black 30%,transparent 100%)}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.2rem 4rem;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg,rgba(6,6,8,.95),transparent);backdrop-filter:blur(12px)}
+.logo{display:flex;align-items:center;gap:.75rem;text-decoration:none}
+.logo-mark{width:32px;height:32px;background:linear-gradient(135deg,var(--gold),var(--teal));clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);display:flex;align-items:center;justify-content:center;font-family:'Fira Code',monospace;font-size:11px;font-weight:500;color:#000}
+.logo-name{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--text)}
+.logo-pro{font-family:'Fira Code',monospace;font-size:.55rem;color:var(--gold);border:1px solid rgba(232,184,75,.3);padding:.1rem .4rem;border-radius:3px;margin-left:.3rem;vertical-align:middle}
+.nav-links{display:flex;align-items:center;gap:2rem}
+.nav-link{font-size:.85rem;font-weight:500;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-link:hover{color:var(--text)}
+.nav-cta{background:var(--gold);color:#000;padding:.5rem 1.3rem;border-radius:4px;font-size:.8rem;font-weight:700;text-decoration:none;letter-spacing:.04em;text-transform:uppercase;transition:all .2s}
+.nav-cta:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 4px 20px rgba(232,184,75,.3)}
+
+.hero{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8rem 2rem 5rem;overflow:hidden}
+.hero::before{content:'';position:absolute;top:10%;left:50%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(ellipse,rgba(232,184,75,.07) 0%,transparent 70%);pointer-events:none}
+.eyebrow{display:inline-flex;align-items:center;gap:.6rem;font-family:'Fira Code',monospace;font-size:.7rem;color:var(--gold);letter-spacing:.15em;text-transform:uppercase;border:1px solid rgba(232,184,75,.25);padding:.4rem 1rem;border-radius:100px;margin-bottom:2rem;animation:fu .8s ease both}
+.dot-pulse{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+h1{font-family:'DM Serif Display',serif;font-size:clamp(3rem,7vw,5.5rem);line-height:1.05;letter-spacing:-.03em;margin-bottom:1.5rem;animation:fu .8s .1s ease both}
+h1 em{font-style:italic;background:linear-gradient(135deg,var(--gold),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:1.1rem;color:var(--muted);max-width:540px;margin:0 auto 3rem;line-height:1.75;animation:fu .8s .2s ease both}
+.hero-actions{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;justify-content:center;animation:fu .8s .3s ease both}
+.btn-p{background:var(--gold);color:#000;padding:.85rem 2.2rem;border-radius:6px;font-size:.9rem;font-weight:700;text-decoration:none;letter-spacing:.04em;text-transform:uppercase;transition:all .2s;display:inline-flex;align-items:center;gap:.5rem}
+.btn-p:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 8px 30px rgba(232,184,75,.35)}
+.btn-s{border:1px solid var(--rim2);color:var(--text);padding:.85rem 2.2rem;border-radius:6px;font-size:.9rem;font-weight:500;text-decoration:none;transition:all .2s;display:inline-flex;align-items:center;gap:.5rem}
+.btn-s:hover{border-color:var(--rim2);background:var(--rim);transform:translateY(-2px)}
+@keyframes fu{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+
+/* Live counter */
+.counter-wrap{display:inline-flex;align-items:center;gap:2rem;background:var(--surface);border:1px solid var(--rim2);border-radius:8px;padding:1.2rem 2rem;margin-top:2.5rem;animation:fu .8s .4s ease both}
+.cnt{text-align:center}
+.cnt-num{font-family:'Fira Code',monospace;font-size:1.5rem;font-weight:500;color:var(--gold);display:block}
+.cnt-lbl{font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.cnt-div{width:1px;height:40px;background:var(--rim2)}
+.hero-trust{margin-top:2rem;font-size:.8rem;color:var(--faint);animation:fu .8s .5s ease both}
+.hero-trust span{color:var(--muted)}
+
+/* Ticker */
+.ticker-wrap{position:relative;z-index:1;border-top:1px solid var(--rim);border-bottom:1px solid var(--rim);padding:.9rem 0;overflow:hidden;background:linear-gradient(90deg,var(--void) 0%,transparent 12%,transparent 88%,var(--void) 100%)}
+.ticker{display:flex;gap:4rem;animation:tick 30s linear infinite;white-space:nowrap}
+.ti{display:flex;align-items:center;gap:.75rem;font-family:'Fira Code',monospace;font-size:.7rem;color:var(--muted);flex-shrink:0}
+.ti .dot{color:var(--gold)}
+@keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* Sections */
+section{position:relative;z-index:1;padding:7rem 4rem}
+.section-tag{font-family:'Fira Code',monospace;font-size:.65rem;color:var(--gold);letter-spacing:.18em;text-transform:uppercase;margin-bottom:1.2rem;display:block}
+.section-title{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);line-height:1.1;letter-spacing:-.02em;margin-bottom:1rem}
+.section-sub{font-size:1rem;color:var(--muted);max-width:500px;line-height:1.7;margin-bottom:3.5rem}
+
+/* HOW IT WORKS */
+.pipe{display:flex;align-items:stretch;gap:0;background:var(--deep);border:1px solid var(--rim2);border-radius:10px;overflow:hidden;margin-top:3rem;overflow-x:auto}
+.pipe-step{flex:1;min-width:150px;padding:2rem 1.5rem;border-right:1px solid var(--rim);position:relative;transition:background .3s}
+.pipe-step:last-child{border-right:none}
+.pipe-step:hover{background:var(--surface)}
+.pipe-n{font-family:'Fira Code',monospace;font-size:.6rem;color:var(--gold);letter-spacing:.12em;margin-bottom:1rem;display:block}
+.pipe-icon{font-size:1.8rem;margin-bottom:.75rem;display:block}
+.pipe-t{font-size:.9rem;font-weight:700;margin-bottom:.4rem}
+.pipe-d{font-size:.75rem;color:var(--muted);line-height:1.5}
+
+/* STATS BAR */
+.stats-bar{background:var(--surface);border-top:1px solid var(--rim);border-bottom:1px solid var(--rim);padding:4rem}
+.stats-inner{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rim);border:1px solid var(--rim);border-radius:8px;overflow:hidden;max-width:900px;margin:0 auto}
+.sbox{background:var(--surface);padding:2.5rem 2rem;text-align:center}
+.snum{font-family:'DM Serif Display',serif;font-size:2.8rem;line-height:1;background:linear-gradient(135deg,var(--gold),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block;margin-bottom:.5rem}
+.slbl{font-size:.78rem;color:var(--muted)}
+
+/* FEATURES */
+.feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rim);border:1px solid var(--rim);border-radius:8px;overflow:hidden}
+.feat{background:var(--deep);padding:2.5rem;position:relative;overflow:hidden;transition:background .3s}
+.feat:hover{background:var(--surface)}
+.feat::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity .3s}
+.feat:hover::before{opacity:1}
+.ftag{font-family:'Fira Code',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;padding:.18rem .55rem;border-radius:3px;margin-bottom:1.2rem;display:inline-block}
+.ft-text{background:rgba(96,144,245,.1);color:var(--blue)}
+.ft-img{background:rgba(45,212,196,.1);color:var(--teal)}
+.ft-aud{background:rgba(232,184,75,.1);color:var(--gold)}
+.ft-vid{background:rgba(240,96,144,.1);color:var(--rose)}
+.ft-ai{background:rgba(232,184,75,.06);color:var(--gold)}
+.ft-api{background:rgba(255,255,255,.05);color:var(--muted)}
+.ft-gb{background:rgba(45,212,196,.08);color:var(--teal)}
+.feat h3{font-size:1.1rem;font-weight:700;margin-bottom:.65rem;letter-spacing:-.01em}
+.feat p{font-size:.85rem;color:var(--muted);line-height:1.65;margin-bottom:1.3rem}
+.feat ul{list-style:none;display:flex;flex-direction:column;gap:.4rem}
+.feat li{font-size:.8rem;color:var(--muted);display:flex;align-items:flex-start;gap:.5rem}
+.feat li::before{content:'→';color:var(--gold);flex-shrink:0}
+
+/* TARGET GB SECTION */
+.target-section{background:linear-gradient(180deg,var(--void),var(--surface))}
+.target-visual{background:var(--deep);border:1px solid var(--rim2);border-radius:10px;padding:2.5rem;margin-top:3rem}
+.target-presets{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:2rem}
+.preset-pill{font-family:'Fira Code',monospace;font-size:.75rem;font-weight:500;padding:.5rem 1.2rem;border:1px solid var(--rim2);border-radius:100px;color:var(--muted);cursor:pointer;transition:all .2s}
+.preset-pill.active,.preset-pill:hover{border-color:var(--gold);color:var(--gold);background:rgba(232,184,75,.08)}
+.preset-pill.custom-pill{border-style:dashed}
+.target-logic{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center}
+.logic-steps{display:flex;flex-direction:column;gap:1rem}
+.logic-step{display:flex;align-items:flex-start;gap:.9rem;padding:.9rem;background:var(--surface2);border-radius:6px;border:1px solid var(--rim)}
+.logic-step-icon{font-size:1.2rem;flex-shrink:0}
+.logic-step-title{font-size:.85rem;font-weight:600;margin-bottom:.2rem}
+.logic-step-desc{font-size:.75rem;color:var(--muted);line-height:1.5}
+.exhausted-box{background:var(--surface2);border:1px solid var(--rim2);border-radius:8px;padding:1.5rem;margin-top:1.5rem;text-align:center}
+.exhausted-box .emoji{font-size:2rem;display:block;margin-bottom:.75rem}
+.exhausted-box p{font-size:.85rem;color:var(--muted);line-height:1.6;font-style:italic}
+.exhausted-box strong{color:var(--text)}
+
+/* PRICING */
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;max-width:960px;margin:0 auto}
+.plan{background:var(--deep);border:1px solid var(--rim2);border-radius:8px;padding:2.5rem;position:relative;transition:border-color .3s,transform .3s}
+.plan:hover{transform:translateY(-4px)}
+.plan.hot{border-color:var(--gold);background:linear-gradient(180deg,rgba(232,184,75,.04),var(--deep))}
+.plan.hot::before{content:'Most Popular';position:absolute;top:1.2rem;right:1.2rem;font-family:'Fira Code',monospace;font-size:.58rem;background:var(--gold);color:#000;padding:.18rem .55rem;border-radius:3px;letter-spacing:.06em}
+.plan-name{font-family:'Fira Code',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:1.2rem;display:block}
+.plan-price{font-family:'DM Serif Display',serif;font-size:2.8rem;line-height:1;margin-bottom:.25rem}
+.plan-price sup{font-size:1.1rem;vertical-align:top;margin-top:.4rem;display:inline-block}
+.plan-period{font-size:.8rem;color:var(--muted);margin-bottom:2rem;display:block}
+.plan-feats{list-style:none;display:flex;flex-direction:column;gap:.6rem;margin-bottom:2rem}
+.plan-feats li{font-size:.83rem;color:var(--muted);display:flex;align-items:center;gap:.6rem}
+.ck{color:var(--teal)}.cx{color:var(--faint)}
+.plan-btn{display:block;width:100%;text-align:center;padding:.8rem;border-radius:5px;font-size:.82rem;font-weight:600;text-decoration:none;letter-spacing:.04em;transition:all .2s;text-transform:uppercase}
+.pb-gold{background:var(--gold);color:#000}.pb-gold:hover{background:var(--gold2)}
+.pb-rim{border:1px solid var(--rim2);color:var(--text)}.pb-rim:hover{background:var(--rim)}
+.pb-ghost{border:1px solid var(--rim);color:var(--muted)}.pb-ghost:hover{color:var(--text)}
+
+/* API */
+.api-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+.code-block{background:var(--deep);border:1px solid var(--rim2);border-radius:8px;padding:1.8rem;font-family:'Fira Code',monospace;font-size:.75rem;line-height:1.85;color:#ccc;overflow-x:auto}
+.cc{color:var(--faint)}.ck2{color:var(--teal)}.cv{color:var(--gold2)}.cs{color:var(--rose)}.cn{color:var(--blue)}
+
+/* Testimonials */
+.test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.test{background:var(--deep);border:1px solid var(--rim);border-radius:8px;padding:2rem;transition:border-color .3s}
+.test:hover{border-color:var(--rim2)}
+.test-text{font-size:.88rem;color:var(--text);line-height:1.7;margin-bottom:1.5rem;font-style:italic}
+.test-text::before{content:'"';color:var(--gold);font-size:1.5rem;font-family:'DM Serif Display',serif;line-height:.5;display:block;margin-bottom:.5rem}
+.test-author{display:flex;align-items:center;gap:.75rem}
+.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex-shrink:0}
+.auth-name{font-size:.85rem;font-weight:600}
+.auth-role{font-size:.72rem;color:var(--muted)}
+
+/* CTA */
+.cta-sec{text-align:center;padding:8rem 4rem;position:relative;overflow:hidden}
+.cta-sec::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(232,184,75,.06),transparent 70%);pointer-events:none}
+.cta-title{font-family:'DM Serif Display',serif;font-size:clamp(2.5rem,5vw,3.8rem);letter-spacing:-.03em;margin-bottom:1.5rem}
+.cta-sub{font-size:1rem;color:var(--muted);max-width:460px;margin:0 auto 2.5rem;line-height:1.7}
+
+footer{border-top:1px solid var(--rim);padding:3rem 4rem;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:3rem}
+.ft-brand p{font-size:.83rem;color:var(--muted);line-height:1.6;margin-top:.8rem;max-width:220px}
+.ft-col h4{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem}
+.ft-col a{display:block;font-size:.83rem;color:var(--faint);text-decoration:none;margin-bottom:.45rem;transition:color .2s}
+.ft-col a:hover{color:var(--text)}
+.foot-bottom{border-top:1px solid var(--rim);padding:1.2rem 4rem;display:flex;align-items:center;justify-content:space-between;font-size:.75rem;color:var(--faint)}
+
+@media(max-width:900px){
+  nav{padding:1rem 1.5rem}
+  section{padding:4rem 1.5rem}
+  .feat-grid,.price-grid,.test-grid,.api-grid,.target-logic{grid-template-columns:1fr}
+  .stats-inner{grid-template-columns:1fr 1fr}
+  footer{grid-template-columns:1fr 1fr;padding:2rem 1.5rem}
+  .nav-links{display:none}
+  .pipe{flex-wrap:wrap}
+  .counter-wrap{flex-wrap:wrap;gap:1rem}
+}
+</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='brand-skin.css') }}"/>
+</head>
+<body class="landing-page">
+<div class="grid-bg"></div>
+
+<nav>
+  <a class="logo" href="/">
+    <div class="logo-mark">DF</div>
+    <span class="logo-name">DataForge<span class="logo-pro">PRO</span></span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="#how">How it works</a>
+    <a class="nav-link" href="#features">Features</a>
+    <a class="nav-link" href="#target">Target GB</a>
+    <a class="nav-link" href="#pricing">Pricing</a>
+    <a class="nav-link" href="/app">Dashboard</a>
+  </div>
+  <a class="nav-cta" href="/app">Start free →</a>
+</nav>
+
+<section class="hero">
+  <div class="eyebrow"><span class="dot-pulse"></span>AI Data Infrastructure Platform</div>
+  <h1>Your dataset.<br/><em>Choose a target. Any type.</em></h1>
+  <p class="hero-sub">Choose a topic, data type, and size target. DataForge searches for matching text, image, audio, and video resources, then packages the results collected in a run of up to five minutes.</p>
+  <div class="hero-actions">
+    <a class="btn-p" href="/app">⚡ Start generating free</a>
+    <a class="btn-s" href="#how">How it works →</a>
+  </div>
+  <div class="counter-wrap">
+    <div class="cnt"><span class="cnt-num" id="c1">4</span><span class="cnt-lbl">Data types</span></div>
+    <div class="cnt-div"></div>
+    <div class="cnt"><span class="cnt-num" id="c2">60s</span><span class="cnt-lbl">Maximum run window</span></div>
+    <div class="cnt-div"></div>
+    <div class="cnt"><span class="cnt-num" id="c3">64MB</span><span class="cnt-lbl">Default collection cap</span></div>
+  </div>
+  <p class="hero-trust">Results depend on the public sources available for your topic.</p>
+</section>
+
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span class="ti"><span class="dot">●</span>Agriculture Disease Detection</span>
+    <span class="ti"><span class="dot">●</span>Medical Imaging Datasets</span>
+    <span class="ti"><span class="dot">●</span>Speech Recognition Corpora</span>
+    <span class="ti"><span class="dot">●</span>Satellite Imagery Labels</span>
+    <span class="ti"><span class="dot">●</span>Sentiment Analysis Data</span>
+    <span class="ti"><span class="dot">●</span>Wildlife Classification</span>
+    <span class="ti"><span class="dot">●</span>Video Action Recognition</span>
+    <span class="ti"><span class="dot">●</span>News Clustering Datasets</span>
+    <span class="ti"><span class="dot">●</span>Agriculture Disease Detection</span>
+    <span class="ti"><span class="dot">●</span>Medical Imaging Datasets</span>
+    <span class="ti"><span class="dot">●</span>Speech Recognition Corpora</span>
+    <span class="ti"><span class="dot">●</span>Satellite Imagery Labels</span>
+    <span class="ti"><span class="dot">●</span>Sentiment Analysis Data</span>
+    <span class="ti"><span class="dot">●</span>Wildlife Classification</span>
+    <span class="ti"><span class="dot">●</span>Video Action Recognition</span>
+    <span class="ti"><span class="dot">●</span>News Clustering Datasets</span>
+  </div>
+</div>
+
+<section id="how">
+  <span class="section-tag">How it works</span>
+  <h2 class="section-title">From topic to dataset.<br/>Six steps.</h2>
+  <p class="section-sub">No pipelines. No engineers. No labeling. Just tell DataForge what you need and how much.</p>
+  <div class="pipe">
+    <div class="pipe-step"><span class="pipe-n">01</span><span class="pipe-icon">💬</span><div class="pipe-t">Describe</div><div class="pipe-d">Type anything — sentence, question, keyword. AI understands all of it.</div></div>
+    <div class="pipe-step"><span class="pipe-n">02</span><span class="pipe-icon">🎯</span><div class="pipe-t">Set target</div><div class="pipe-d">Choose a size target; each collection run has a time and output limit.</div></div>
+    <div class="pipe-step"><span class="pipe-n">03</span><span class="pipe-icon">🕷️</span><div class="pipe-t">Auto crawl</div><div class="pipe-d">Searches available web sources, follows relevant links, and saves matching results.</div></div>
+    <div class="pipe-step"><span class="pipe-n">04</span><span class="pipe-icon">🎯</span><div class="pipe-t">Filter</div><div class="pipe-d">Relevance scoring blocks noise. Only data matching your topic passes.</div></div>
+    <div class="pipe-step"><span class="pipe-n">05</span><span class="pipe-icon">🏷️</span><div class="pipe-t">Organize text</div><div class="pipe-d">Text results can include sentiment labels and topic clusters.</div></div>
+    <div class="pipe-step"><span class="pipe-n">06</span><span class="pipe-icon">📦</span><div class="pipe-t">Download</div><div class="pipe-d">Download the collected files and metadata as a ZIP.</div></div>
+  </div>
+</section>
+
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="sbox"><span class="snum">60s</span><span class="slbl">Maximum run window</span></div>
+    <div class="sbox"><span class="snum">64MB</span><span class="slbl">Default collection cap per job</span></div>
+    <div class="sbox"><span class="snum">4</span><span class="slbl">Data modalities</span></div>
+    <div class="sbox"><span class="snum">4</span><span class="slbl">Default concurrent jobs</span></div>
+  </div>
+</div>
+
+<!-- TARGET GB SECTION -->
+<section id="target" class="target-section">
+  <span class="section-tag">Target-GB Engine</span>
+  <h2 class="section-title">Set a target.<br/>Track the run.</h2>
+  <p class="section-sub">The selected size is a target, not a guarantee. DataForge searches for up to five minutes and packages the results it collects.</p>
+
+  <div class="target-visual">
+    <div style="margin-bottom:1.5rem">
+      <div style="font-family:'Fira Code',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.8rem">Choose your target</div>
+      <div class="target-presets">
+        <span class="preset-pill">500 MB</span>
+        <span class="preset-pill active">1 GB</span>
+        <span class="preset-pill">2 GB</span>
+        <span class="preset-pill">5 GB</span>
+        <span class="preset-pill">10 GB</span>
+        <span class="preset-pill">50 GB</span>
+        <span class="preset-pill">100 GB</span>
+        <span class="preset-pill custom-pill">✏ Custom (any number)</span>
+      </div>
+    </div>
+
+    <div class="target-logic">
+      <div class="logic-steps">
+        <div class="logic-step">
+          <span class="logic-step-icon">🔄</span>
+          <div>
+            <div class="logic-step-title">Round 1 — Discover & crawl</div>
+            <div class="logic-step-desc">Finds candidate URLs from available search and feed sources, then checks pages for matching content.</div>
+          </div>
+        </div>
+        <div class="logic-step">
+          <span class="logic-step-icon">📊</span>
+          <div>
+            <div class="logic-step-title">Check the collected size</div>
+            <div class="logic-step-desc">Compares collected bytes against your target and displays the run time remaining.</div>
+          </div>
+        </div>
+        <div class="logic-step">
+          <span class="logic-step-icon">🔍</span>
+          <div>
+            <div class="logic-step-title">Round 2+ — Fresh discovery</div>
+            <div class="logic-step-desc">Checks for additional sources within the run's time and round limits.</div>
+          </div>
+        </div>
+        <div class="logic-step">
+          <span class="logic-step-icon">🎉</span>
+          <div>
+            <div class="logic-step-title">Run ends — dataset saved</div>
+            <div class="logic-step-desc">Packages the collected data and metadata in a ZIP. The download appears when packaging finishes.</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="exhausted-box">
+          <span class="emoji">😔</span>
+          <p>If the run ends before reaching the requested size, DataForge saves the partial results:</p>
+          <br/>
+          <p style="font-family:'Fira Code',monospace;font-size:.75rem;color:var(--gold);margin-top:.5rem;line-height:1.6">
+            "Time limit reached. Partial dataset saved: 12.4 MB of 1 GB target."
+          </p>
+          <br/>
+          <p>The selected size is a target. The dataset contains results collected during the run.</p>
+        </div>
+        <div style="margin-top:1.2rem;padding:1rem;background:var(--surface2);border:1px solid var(--rim);border-radius:6px;font-family:'Fira Code',monospace;font-size:.68rem;color:var(--muted);line-height:1.8">
+          <span style="color:var(--gold)">Run progress shows:</span><br/>
+          → Collected so far (e.g. 2.3 GB)<br/>
+          → Target size (e.g. 10 GB)<br/>
+          → Fill bar — grows as data arrives<br/>
+          → Run time remaining<br/>
+          → Round number — which discovery pass you're on
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <span class="section-tag">Features</span>
+  <h2 class="section-title">Everything a dataset needs.<br/>Nothing it doesn't.</h2>
+  <p class="section-sub">Built for ML researchers who need real, labeled data at scale.</p>
+  <div class="feat-grid">
+    <div class="feat">
+      <span class="ftag ft-text">Text</span>
+      <h3>Focused article collection</h3>
+      <p>Collects relevant text from pages and follows a limited number of internal links. Exports records in CSV, JSON, and JSONL formats.</p>
+      <ul>
+        <li>Sentiment labels — POSITIVE / NEGATIVE / NEUTRAL</li>
+        <li>TF-IDF topic clustering with named labels</li>
+        <li>Relevance filter blocks off-topic pages</li>
+        <li>CSV, JSON, and JSONL export</li>
+      </ul>
+    </div>
+    <div class="feat">
+      <span class="ftag ft-img">Images</span>
+      <h3>Context-aware image collection</h3>
+      <p>Downloads images only when alt text + surrounding text + page title match your topic. No icons, no trackers, no garbage.</p>
+      <ul>
+        <li>JPG, PNG, WEBP, GIF, BMP supported</li>
+        <li>Content-type verified before download</li>
+        <li>Size filter removes thumbnails under 5KB</li>
+        <li>Full image_dataset.csv + JSON metadata</li>
+      </ul>
+    </div>
+    <div class="feat">
+      <span class="ftag ft-aud">Audio</span>
+      <h3>Targeted audio collection</h3>
+      <p>Searches Freesound.org and Archive.org, then checks candidate files against the selected topic.</p>
+      <ul>
+        <li>MP3, WAV, OGG, FLAC, M4A, AAC</li>
+        <li>Relevance filter on filename + context</li>
+        <li>Content-type verified — no fake audio</li>
+        <li>audio_dataset.csv + JSON metadata</li>
+      </ul>
+    </div>
+    <div class="feat">
+      <span class="ftag ft-vid">Video</span>
+      <h3>Open video dataset collection</h3>
+      <p>Searches Archive.org video archives and open repositories. Downloads MP4, WEBM, MOV with topic relevance checking.</p>
+      <ul>
+        <li>MP4, WEBM, AVI, MOV, MKV supported</li>
+        <li>Archive.org deep integration</li>
+        <li>File size cap prevents runaway downloads</li>
+        <li>video_dataset.csv + JSON metadata</li>
+      </ul>
+    </div>
+    <div class="feat">
+      <span class="ftag ft-gb">Target-GB Engine</span>
+      <h3>Bounded collection runs</h3>
+      <p>Choose a requested size and data type. DataForge searches within a time limit and packages available results when the run ends.</p>
+      <ul>
+        <li>Parallel page discovery and media downloads</li>
+        <li>Run time countdown in the dashboard</li>
+        <li>Partial results are saved at the time limit</li>
+        <li>No fake progress — real byte counting</li>
+      </ul>
+    </div>
+    <div class="feat">
+      <span class="ftag ft-api">REST API</span>
+      <h3>Programmatic access</h3>
+      <p>Full REST API. Start jobs, poll status, stream logs, download results — all programmable. Build data pipelines that run automatically.</p>
+      <ul>
+        <li>POST /api/start — launch any pipeline</li>
+        <li>GET /api/status/:id — real-time progress + logs</li>
+        <li>GET /api/download/:id — retrieve ZIP</li>
+        <li>Standard HTTP, JSON responses</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section style="background:var(--void)" id="api">
+  <div class="api-grid">
+    <div>
+      <span class="section-tag">REST API</span>
+      <h2 class="section-title">Plug into<br/>any workflow.</h2>
+      <p class="section-sub">Build automated data pipelines. Schedule dataset generation. Pull data into your training scripts programmatically.</p>
+      <a class="btn-p" href="/app">View full API docs →</a>
+    </div>
+    <div class="code-block">
+<span class="cc"># Start a 2GB text dataset job</span>
+<span class="ck2">import</span> requests, time
+
+r = requests.<span class="ck2">post</span>(<span class="cs">'http://localhost:5000/api/start'</span>, json={
+  <span class="cs">"topic"</span>: <span class="cv">"crop disease detection agriculture"</span>,
+  <span class="cs">"mode"</span>: <span class="cv">"text"</span>,
+  <span class="cs">"target_gb"</span>: <span class="cn">2.0</span>,       <span class="cc"># run until 2GB collected</span>
+  <span class="cs">"min_relevance"</span>: <span class="cn">0.35</span>,  <span class="cc"># filter strength</span>
+  <span class="cs">"num_clusters"</span>: <span class="cn">8</span>,
+})
+
+job_id = r.json()[<span class="cs">"job_id"</span>]
+
+<span class="cc"># Poll until complete</span>
+<span class="ck2">while True</span>:
+  s = requests.get(f<span class="cs">'/api/status/{job_id}'</span>).json()
+  collected = s[<span class="cs">'collected_bytes'</span>] / <span class="cn">1024</span>**<span class="cn">3</span>
+  print(f<span class="cs">"Progress: {collected:.2f}GB / 2GB"</span>)
+  <span class="ck2">if</span> s[<span class="cs">"status"</span>] <span class="ck2">in</span> [<span class="cs">"done"</span>, <span class="cs">"error"</span>]: <span class="ck2">break</span>
+  <span class="ck2">if</span> s.get(<span class="cs">"internet_exhausted"</span>):
+    print(<span class="cs">"Internet exhausted for this topic"</span>)
+    <span class="ck2">break</span>
+  time.sleep(<span class="cn">5</span>)
+
+<span class="cc"># Download the dataset</span>
+data = requests.get(f<span class="cs">'/api/download/{job_id}'</span>)
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="section-tag">Testimonials</span>
+  <h2 class="section-title">Real researchers.<br/>Real datasets.</h2>
+  <p class="section-sub">Used by ML researchers and students at universities across India.</p>
+  <div class="test-grid">
+    <div class="test">
+      <p class="test-text">Generated a 3GB crop disease image dataset in under 2 hours. It would have taken my team weeks manually. The relevance filter actually works — no random garbage.</p>
+      <div class="test-author"><div class="avatar" style="background:rgba(45,212,196,.15);color:var(--teal)">RK</div><div><div class="auth-name">Rahul Kumar</div><div class="auth-role">PhD Researcher, IIT Bombay</div></div></div>
+    </div>
+    <div class="test">
+      <p class="test-text">The target GB feature is exactly what I needed. Set 5GB, went for lunch, came back to a complete labeled dataset. Saved me 3 days of annotation work.</p>
+      <div class="test-author"><div class="avatar" style="background:rgba(232,184,75,.12);color:var(--gold)">PS</div><div><div class="auth-name">Priya Sharma</div><div class="auth-role">ML Engineer, Bangalore</div></div></div>
+    </div>
+    <div class="test">
+      <p class="test-text">Used this for my final year project. The jury had never seen a student generate their own labeled dataset at this scale. Best project award at our college.</p>
+      <div class="test-author"><div class="avatar" style="background:rgba(240,96,144,.12);color:var(--rose)">AM</div><div><div class="auth-name">Aditya Mishra</div><div class="auth-role">B.Tech CSE, NIT Warangal</div></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing" style="background:var(--void)">
+  <div style="text-align:center;margin-bottom:4rem">
+    <span class="section-tag" style="display:block;text-align:center">Pricing</span>
+    <h2 class="section-title">Start free. Scale as you grow.</h2>
+    <p class="section-sub" style="margin:0 auto">No credit card required. Cancel anytime.</p>
+  </div>
+  <div class="price-grid">
+    <div class="plan">
+      <span class="plan-name">Starter</span>
+      <div class="plan-price"><sup>$</sup>0</div>
+      <span class="plan-period">Free forever</span>
+      <ul class="plan-feats">
+        <li><span class="ck">✓</span> Up to 500 MB per dataset</li>
+        <li><span class="ck">✓</span> Text + Image pipelines</li>
+        <li><span class="ck">✓</span> 3 jobs per day</li>
+        <li><span class="ck">✓</span> CSV + JSON export</li>
+        <li><span class="cx">✗</span> Audio/Video pipelines</li>
+        <li><span class="cx">✗</span> Target-GB engine</li>
+        <li><span class="cx">✗</span> API access</li>
+      </ul>
+      <a class="plan-btn pb-rim" href="/app">Get started free</a>
+    </div>
+    <div class="plan hot">
+      <span class="plan-name">Pro</span>
+      <div class="plan-price"><sup>$</sup>49</div>
+      <span class="plan-period">per month</span>
+      <ul class="plan-feats">
+        <li><span class="ck">✓</span> Up to 50 GB per dataset</li>
+        <li><span class="ck">✓</span> All 4 modalities</li>
+        <li><span class="ck">✓</span> Unlimited jobs</li>
+        <li><span class="ck">✓</span> CSV + JSON + JSONL</li>
+        <li><span class="ck">✓</span> Target-GB engine</li>
+        <li><span class="ck">✓</span> Full API access</li>
+        <li><span class="ck">✓</span> Downloadable CSV and JSON metadata</li>
+      </ul>
+      <a class="plan-btn pb-gold" href="/app">Start Pro trial</a>
+    </div>
+    <div class="plan">
+      <span class="plan-name">Enterprise</span>
+      <div class="plan-price"><sup>$</sup>299</div>
+      <span class="plan-period">per month</span>
+      <ul class="plan-feats">
+        <li><span class="ck">✓</span> Unlimited dataset size</li>
+        <li><span class="ck">✓</span> All 4 modalities</li>
+        <li><span class="ck">✓</span> Priority crawling</li>
+        <li><span class="ck">✓</span> All export formats</li>
+        <li><span class="ck">✓</span> Custom deployment</li>
+        <li><span class="ck">✓</span> Dedicated API endpoint</li>
+        <li><span class="ck">✓</span> SLA + priority support</li>
+      </ul>
+      <a class="plan-btn pb-ghost" href="mailto:hello@dataforge.ai">Contact sales</a>
+    </div>
+  </div>
+</section>
+
+<section class="cta-sec">
+  <h2 class="cta-title">Your dataset is<br/>waiting to be built.</h2>
+  <p class="cta-sub">Stop spending weeks collecting and labeling data. DataForge does it while you sleep.</p>
+  <div class="hero-actions">
+    <a class="btn-p" href="/app">⚡ Start generating free</a>
+    <a class="btn-s" href="#features">See all features →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="ft-brand">
+    <div class="logo" style="margin-bottom:.8rem">
+      <div class="logo-mark">DF</div>
+      <span class="logo-name">DataForge<span class="logo-pro">PRO</span></span>
+    </div>
+    <p>AI-powered dataset generation. Built for ML researchers and data scientists.</p>
+  </div>
+  <div class="ft-col">
+    <h4>Product</h4>
+    <a href="#features">Features</a>
+    <a href="#target">Target-GB Engine</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#api">API</a>
+    <a href="/app">Dashboard</a>
+  </div>
+  <div class="ft-col">
+    <h4>Data types</h4>
+    <a href="/app">Text datasets</a>
+    <a href="/app">Image datasets</a>
+    <a href="/app">Audio datasets</a>
+    <a href="/app">Video datasets</a>
+  </div>
+  <div class="ft-col">
+    <h4>Company</h4>
+    <a href="#">About</a>
+    <a href="mailto:hello@dataforge.ai">Contact</a>
+    <a href="#">Privacy policy</a>
+    <a href="#">Terms of service</a>
+  </div>
+</footer>
+<div class="foot-bottom">
+  <span>© 2026 DataForge Pro. Built by HIKE</span>
+  <span style="font-family:'Fira Code',monospace">v5.0.0</span>
+</div>
+
+<script>
+function animCount(el,target,suffix='',dec=0){
+  const dur=2000,st=performance.now();
+  function upd(now){
+    const p=Math.min((now-st)/dur,1),e=1-Math.pow(1-p,3),v=e*target;
+    el.textContent=dec>0?v.toFixed(dec)+suffix:Math.floor(v).toLocaleString()+suffix;
+    if(p<1)requestAnimationFrame(upd);
+  }
+  requestAnimationFrame(upd);
+}
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      animCount(document.getElementById('c1'),4);
+      animCount(document.getElementById('c2'),60,'s');
+      animCount(document.getElementById('c3'),64,'MB');
+      obs.disconnect();
+    }
+  });
+},{threshold:0.5});
+const cw=document.querySelector('.counter-wrap');
+if(cw)obs.observe(cw);
+
+// Scroll fade in
+const fobs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)'}
+  });
+},{threshold:0.1});
+document.querySelectorAll('.feat,.plan,.test,.pipe-step,.sbox,.logic-step').forEach(el=>{
+  el.style.opacity='0';el.style.transform='translateY(18px)';
+  el.style.transition='opacity 0.45s ease,transform 0.45s ease';
+  fobs.observe(el);
+});
+</script>
+</body>
+</html>
